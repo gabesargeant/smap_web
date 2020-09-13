@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Serverless Data about places, with maps...</title>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="databymap.css">
+  <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+  <link rel="stylesheet" href="https://js.arcgis.com/3.21/dijit/themes/claro/claro.css">
+
+</head>
+
+<body>
+
+  <script src="https://js.arcgis.com/3.21/"></script>
+  <script src="map.js"></script>
+  <script src="jq_helper.js"></script>
+
+  <div id="map">
+    <div class="floatingControls c35 flex_container">
+      <div class="flex_control">
+        <select id="selectLayer" name="selectLayer" class="select-style">
+          <option value="1" selected="selected">Select the Level of Detail</option>
+          <option value="0">Australia</option>
+          <option value="1">State/Territory</option>
+          <option value="2">Statistical Area Level 4</option>
+          <option value="3">Statistical Area Level 3</option>
+          <option value="4">Statistical Area Level 2</option>
+          <option value="5">Statistical Area Level 1 (Zoom in!)</option>
+          <option value="6">State Suburbs (Zoom in!)</option>
+          <option value="7">Postal Areas (Zoom in!)</option>
+          <option value="8">Greater Capital City Statistical Areas</option>
+          <option value="9">Commonwealth Electoral Divisions</option>
+          <option value="10">State Electoral Divisions</option>
+          <option value="11">Local Government Areas</option>
+
+        </select> &nbsp;&nbsp;&nbsp;
+      </div>
+      <div class="flex_control"><input name="drawPolygon" type="button" id="drawPolygon" value="Select a Polygon"
+          class="btn" /> OR &nbsp;</div>
+      <div class="flex_control"><input name="drawRectangle" type="button" id="drawRectangle" value="Select a Rectangle"
+          class="btn" /> OR &nbsp;</div>
+      <div class="flex_control"><input name="drawPoint" type="button" id="drawPoint" value="Select a Point"
+          class="btn" />
+        &nbsp;&nbsp;&nbsp;</div>
+      <div class="flex_control"><input name="Reset" type="button" id="Reset" value="Reset" class="greenBtn" />
+        &nbsp;&nbsp;&nbsp; </div>
+      <div class="flex_control"><input type="hidden" id="fieldsArr" name="fieldsArr" value="" /></div>
+      <div class="flex_control"><input name="getData" type="submit" id="getData" value="Get Data" class="redbtn" />
+      </div>
+    </div>
+    <img id="loadingImg" src="static/img/loading.gif" />
+  </div>
+  </form>

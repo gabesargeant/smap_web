@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> {% if title %}
+    <title>{{title}}</title>
+    {% else %}
+
+    <title>Data about places, with maps...</title>
+    {% endif %}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="static/databymap.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/dijit/themes/claro/claro.css">
+
+</head>
+
+<body>
+    <div><a href="/index"><div class="banner"><img src="/static/img/banner1.jpg"></a></div><br/>
+    <a href="/faq">FAQ, how this works, made, etc</a> </div>
+    <hr/> 
+    
+    {% block content %} {%endblock%}
+    <hr/>
+     
+</body>
+</html>
