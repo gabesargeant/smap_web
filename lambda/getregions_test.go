@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
@@ -16,13 +17,16 @@ type mockGetItems struct {
 }
 
 func (d mockGetItems) GetItem(in *dynamodb.GetItemInput) (*dynamodb.GetItemOutput, error) {
+	fmt.Print("Mock!")
 	return &d.GetItemResponse, nil
 }
 
+// TODO implement this
 // func (d mockGetItems) BatchGetItem(input *dynamodb.BatchGetItemInput) (*dynamodb.BatchGetItemOutput, error) {
 // 	return &d.GetBatchItemResponse, nil
 // }
 
+// TestHandleRequest is tests the happy path test of the dynamo db getitem call for lambda getregions.go
 func TestHandleRequest(t *testing.T) {
 
 	m := mockGetItems{
@@ -39,6 +43,6 @@ func TestHandleRequest(t *testing.T) {
 		TableID:  "G02",
 	}
 
-	d.HandleRequest(context.Background, mr)
+	d.HandleRequest(context.TODO(), mr)
 
 }
