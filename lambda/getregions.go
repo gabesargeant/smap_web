@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
+
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -12,36 +14,55 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-// Record Reciever type for dynamo db.
+// Record result type from dynamodb.
 type Record struct {
 	RegionID string             `json:"RegionID"`
 	TableID  string             `json:"TableID"`
 	KVPairs  map[string]float64 `json:"KVPairs"`
 }
 
-// MapRequest  details
+//Collection Array of Records
+type Collection struct {
+	ArrRecord []Record
+}
+
+// MapRequest  details TODO Eventually replace this with an
+// interface type for the APIGateway Request
 type MapRequest struct {
 	RegionID string `json:"RegionID"`
 	TableID  string `json:"TableID"`
 }
 
-// HandleRequest words etc
-func HandleRequest(ctx context.Context, request MapRequest) (string, error) {
+// Pointer Receiver based dependency injection
+type deps struct {
+	ddb     dynamodbiface.DynamoDBAPI
+	tableID string
+}
 
-	result := getData(request)
+// HandleRequest Main entry point
+//This will eventually take a API Gateway Proxy Request
+//Eventually replace the response type with an API Gateway response type.
+func (d *deps) HandleRequest(ctx context.Context, request MapRequest) (string, error) {
+
+	db := d.ddb
+	t := d.tableID
+	result := getData(request, db, t)
 
 	return fmt.Sprintf("%s", result.Item), nil
 }
 
 func main() {
-	lambda.Start(HandleRequest)
+
+	d := deps{
+		ddb:     dynamodb.New(session.New()),
+		tableID: os.Getenv("DYNAMOTABLE"),
+	}
+
+	lambda.Start(d.HandleRequest)
 }
 
-func getData(request MapRequest) (result *dynamodb.GetItemOutput) {
+func getData(request MapRequest, ddb dynamodbiface.DynamoDBAPI, dbTable string) (result *dynamodb.GetItemOutput) {
 
-	svc := dynamodb.New(session.New())
-
-	dbTable := os.Getenv("DYNAMOTABLE")
 	regionID := request.RegionID
 	tableID := request.TableID
 
@@ -57,7 +78,7 @@ func getData(request MapRequest) (result *dynamodb.GetItemOutput) {
 		TableName: aws.String(dbTable),
 	}
 
-	result, err := svc.GetItem(input)
+	result, err := ddb.GetItem(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
