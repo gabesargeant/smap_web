@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
+	"flag"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"smap/record"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -24,29 +28,78 @@ type Args struct {
 
 // Main - Entry point for writing files into a DynamoDB
 func main() {
+	args := defineFlags()
+	flag.Parse()
+
+	if *args.InputFile == "" {
+		flag.Usage()
+		os.Exit(-99)
+	}
+
+	rec := OpenRecordsAtPath(*args.InputFile)
 
 	var tableName string = "testtable01"
 
 	sess := establishAWSSession()
 
-	getManyItems(tableName, sess)
+	results := getManyItems(tableName, rec, sess)
+
+	marshalAndSaveOut(results)
 
 }
 
-func getManyItems(tableName string, sess *session.Session) {
+func marshalAndSaveOut(resutls []record.Record) {
 
-	regionIds := []string{"1100701", "1100702"}
+	outFile, err := os.Create("output.json")
+	bw := bufio.NewWriter(outFile)
+
+	check(err)
+
+	b, _ := json.Marshal(resutls)
+	bw.Write(b)
+	bw.Flush()
+
+}
+
+func defineFlags() Args {
+	var args = Args{}
+	args.InputFile = flag.String("f", "", "File to read, expected json format")
+
+	return args
+}
+
+type MapRequest struct {
+	RegionID    string `json:"RegionID"`
+	PartitionID string `json:"PartitionID"`
+}
+
+//OpenRecordsAtPath open a json object and marshal it.
+func OpenRecordsAtPath(path string) []MapRequest {
+
+	file, err := ioutil.ReadFile(path)
+
+	var requests = []MapRequest{}
+
+	err = json.Unmarshal([]byte(file), &requests)
+
+	check(err)
+
+	return requests
+
+}
+
+func getManyItems(tableName string, requests []MapRequest, sess *session.Session) []record.Record {
 
 	mapOfKeys := []map[string]*dynamodb.AttributeValue{}
 
-	for _, region := range regionIds {
+	for _, request := range requests {
 
 		mapOfKeys = append(mapOfKeys, map[string]*dynamodb.AttributeValue{
 			"RegionID": &dynamodb.AttributeValue{
-				S: aws.String(region),
+				S: aws.String(request.RegionID),
 			},
 			"TableID": &dynamodb.AttributeValue{
-				S: aws.String("G02"),
+				S: aws.String(request.PartitionID),
 			},
 		})
 
@@ -70,22 +123,24 @@ func getManyItems(tableName string, sess *session.Session) {
 		panic(fmt.Errorf("Batch get item failed, err: %w", err))
 	}
 
+	var fullResults []record.Record
+
 	for _, response := range batch.Responses {
 		for _, item := range response {
 
 			var record record.Record
 			err = dynamodbattribute.UnmarshalMap(item, &record)
 
-			fmt.Println(err)
+			check(err)
 
-			b, _ := json.Marshal(record)
+			//b, _ := json.Marshal(record)
 
-			//fmt.Println(item)
-			fmt.Printf("%s", b)
-			fmt.Println(record.KVPairs)
+			fullResults = append(fullResults, record)
 
 		}
 	}
+
+	return fullResults
 
 }
 
