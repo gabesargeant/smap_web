@@ -12,13 +12,20 @@ import (
 
 type mockGetItems struct {
 	dynamodbiface.DynamoDBAPI
-	GetItemResponse dynamodb.GetItemOutput
-	// GetBatchItemResponse dynamodb.BatchGetItemOutput
+	GetItemResponse      dynamodb.GetItemOutput
+	GetBatchItemResponse dynamodb.BatchGetItemOutput
 }
 
 func (d mockGetItems) GetItem(in *dynamodb.GetItemInput) (*dynamodb.GetItemOutput, error) {
 	fmt.Print("Mock!")
 	return &d.GetItemResponse, nil
+}
+
+func (d mockGetItems) BatchGetItem(in *dynamodb.BatchGetItemInput) (*dynamodb.BatchGetItemOutput, error) {
+	fmt.Print("Mock! batch Item response")
+
+	return &d.GetBatchItemResponse, nil
+
 }
 
 // TODO implement this
@@ -38,10 +45,21 @@ func TestHandleRequest(t *testing.T) {
 		tableID: "testTable",
 	}
 
-	mr := MapRequest{
-		RegionID: "123456",
-		TableID:  "G02",
+	mr0 := MapRequest{
+		RegionID:    "123456",
+		PartitionID: "G02",
 	}
+
+	mr1 := MapRequest{
+		RegionID:    "123456",
+		PartitionID: "G02",
+	}
+
+	mr := []MapRequest{}
+
+	mr = append(mr, mr0, mr1)
+
+	//fmt.Print(mr)
 
 	d.HandleRequest(context.TODO(), mr)
 
