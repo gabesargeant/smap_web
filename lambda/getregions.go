@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"smap/record"
@@ -9,19 +9,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
-
-// Record result type from dynamodb.
-type Record struct {
-	RegionID string             `json:"RegionID"`
-	TableID  string             `json:"TableID"`
-	KVPairs  map[string]float64 `json:"KVPairs"`
-}
 
 // MapRequest  details TODO Eventually replace this with an
 // interface type for the APIGateway Request
@@ -36,24 +30,39 @@ type deps struct {
 	tableID string
 }
 
-// HandleRequest Main entry point
-//This will eventually take a API Gateway Proxy Request
-//Eventually replace the response type with an API Gateway response type.
-func (d *deps) HandleRequest(ctx context.Context, request []MapRequest) ([]record.Record, error) {
+// HandleRequest Main entry point for Lambda
+func (d *deps) HandleRequest(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
+	var request []MapRequest
 	db := d.ddb
-	t := d.tableID
-	//result := getData(request, db, t)
+	table := d.tableID
 
-	result := getBatchData(request, db, t)
+	err := json.Unmarshal([]byte(req.Body), &request)
+
+	if err != nil {
+		fmt.Println("Error with unmarshalling request")
+	}
+	//Validate Requests and trim long requests
+	if len(request) >= 100 {
+		request = request[:99]
+		fmt.Println("Trim request to 100 objects max")
+	}
+
+	// Request items from DB
+	result := getBatchData(request, db, table)
 
 	//Todo do something with errors in response object
+	//Potentially expand the response body to include an set of errors that can be shown by the UI.
+	//maybe....
 
-	//TODO method confirm requests are < 100
+	response := events.APIGatewayProxyResponse{}
+	b, _ := json.Marshal(result)
+	response.Body = string(b)
 
-	return result, nil
+	return response, nil
 }
 
+// main Establish Go session and call lambda start with pointer receiver.
 func main() {
 
 	d := deps{
@@ -93,8 +102,8 @@ func getBatchData(requests []MapRequest, ddb dynamodbiface.DynamoDBAPI, dbTable 
 	batch, err := ddb.BatchGetItem(input)
 
 	if err != nil {
-		panic(fmt.Errorf("Batch get item failed, err: %w", err))
 		processErrors(err)
+		panic(fmt.Errorf("Batch get item failed, err: %w", err))
 	}
 
 	var fullResults []record.Record
@@ -136,49 +145,4 @@ func processErrors(err error) {
 			fmt.Println(err.Error())
 		}
 	}
-}
-
-// getData gets a single request. TODO remove this.
-func getData(request MapRequest, ddb dynamodbiface.DynamoDBAPI, dbTable string) (result *dynamodb.GetItemOutput) {
-
-	regionID := request.RegionID
-	tableID := request.PartitionID
-
-	input := &dynamodb.GetItemInput{
-		Key: map[string]*dynamodb.AttributeValue{
-			"RegionID": {
-				S: aws.String(regionID),
-			},
-			"TableID": {
-				S: aws.String(tableID),
-			},
-		},
-		TableName: aws.String(dbTable),
-	}
-
-	result, err := ddb.GetItem(input)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case dynamodb.ErrCodeProvisionedThroughputExceededException:
-				fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
-			case dynamodb.ErrCodeResourceNotFoundException:
-				fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
-			case dynamodb.ErrCodeRequestLimitExceeded:
-				fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
-			case dynamodb.ErrCodeInternalServerError:
-				fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
-		}
-		return
-	}
-
-	return result
-
 }

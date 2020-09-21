@@ -1,13 +1,15 @@
 package main
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go/aws"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 )
 
 type mockGetItems struct {
@@ -17,23 +19,56 @@ type mockGetItems struct {
 }
 
 func (d mockGetItems) GetItem(in *dynamodb.GetItemInput) (*dynamodb.GetItemOutput, error) {
-	fmt.Print("Mock!")
+	fmt.Println("Mock!")
 	return &d.GetItemResponse, nil
 }
 
 func (d mockGetItems) BatchGetItem(in *dynamodb.BatchGetItemInput) (*dynamodb.BatchGetItemOutput, error) {
-	fmt.Print("Mock! batch Item response")
+	fmt.Println("Mock! batch Item response")
 
-	return &d.GetBatchItemResponse, nil
+	bgio := setup()
+	mgi := mockGetItems{
+		GetBatchItemResponse: bgio,
+	}
+
+	return &mgi.GetBatchItemResponse, nil
 
 }
 
-// TODO implement this
-// func (d mockGetItems) BatchGetItem(input *dynamodb.BatchGetItemInput) (*dynamodb.BatchGetItemOutput, error) {
-// 	return &d.GetBatchItemResponse, nil
-// }
+// setup - This is why the dynamoDB api sucks with golang. I'm dying in a sea of Attribute Values. Gah!
+func setup() dynamodb.BatchGetItemOutput {
 
-// TestHandleRequest is tests the happy path test of the dynamo db getitem call for lambda getregions.go
+	bgio := dynamodb.BatchGetItemOutput{
+		Responses: map[string][]map[string]*dynamodb.AttributeValue{
+
+			"testtable01": []map[string]*dynamodb.AttributeValue{
+				{
+					"RegionId": &dynamodb.AttributeValue{
+						S: aws.String("789123"),
+					},
+					"PartitionID": &dynamodb.AttributeValue{
+						S: aws.String("G02"),
+					},
+					"KVPairs": &dynamodb.AttributeValue{
+						M: map[string]*dynamodb.AttributeValue{
+							"Average_household_size":        &dynamodb.AttributeValue{S: aws.String("2.7")},
+							"Average_num_psns_per_bedroom":  &dynamodb.AttributeValue{S: aws.String("0.7")},
+							"Median_age_persons":            &dynamodb.AttributeValue{S: aws.String("36")},
+							"Median_mortgage_repay_monthly": &dynamodb.AttributeValue{S: aws.String("2470")},
+							"Median_rent_weekly":            &dynamodb.AttributeValue{S: aws.String("450")},
+							"Median_tot_fam_inc_weekly":     &dynamodb.AttributeValue{S: aws.String("2646")},
+							"Median_tot_hhd_inc_weekly":     &dynamodb.AttributeValue{S: aws.String("2330")},
+							"Median_tot_prsnl_inc_weekly":   &dynamodb.AttributeValue{S: aws.String("1132")},
+							"SA1_7DIGITCODE_2016":           &dynamodb.AttributeValue{S: aws.String("1101101")}},
+					},
+				},
+			},
+		},
+	}
+	return bgio
+}
+
+// TestHandleRequest is the happy path test of the dynamodb BatchGetItem call for lambda getregions.go
 func TestHandleRequest(t *testing.T) {
 
 	m := mockGetItems{
@@ -46,7 +81,7 @@ func TestHandleRequest(t *testing.T) {
 	}
 
 	mr0 := MapRequest{
-		RegionID:    "123456",
+		RegionID:    "789123",
 		PartitionID: "G02",
 	}
 
@@ -61,6 +96,15 @@ func TestHandleRequest(t *testing.T) {
 
 	//fmt.Print(mr)
 
-	d.HandleRequest(context.TODO(), mr)
+	req := events.APIGatewayProxyRequest{}
+
+	b, _ := json.Marshal(mr)
+	req.Body = string(b)
+
+	x, _ := d.HandleRequest(req)
+
+	fmt.Println("output")
+	fmt.Println("x")
+	fmt.Println(x)
 
 }

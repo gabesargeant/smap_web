@@ -63,7 +63,7 @@ func marshalAndSaveOut(resutls []record.Record) {
 
 func defineFlags() Args {
 	var args = Args{}
-	args.InputFile = flag.String("f", "", "File to read, expected json format")
+	args.InputFile = flag.String("f", "input.json", "File to read, expected json format")
 
 	return args
 }
@@ -98,7 +98,7 @@ func getManyItems(tableName string, requests []MapRequest, sess *session.Session
 			"RegionID": &dynamodb.AttributeValue{
 				S: aws.String(request.RegionID),
 			},
-			"TableID": &dynamodb.AttributeValue{
+			"PartitionID": &dynamodb.AttributeValue{
 				S: aws.String(request.PartitionID),
 			},
 		})
