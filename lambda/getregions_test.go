@@ -51,15 +51,15 @@ func setup() dynamodb.BatchGetItemOutput {
 					},
 					"KVPairs": &dynamodb.AttributeValue{
 						M: map[string]*dynamodb.AttributeValue{
-							"Average_household_size":        &dynamodb.AttributeValue{S: aws.String("2.7")},
-							"Average_num_psns_per_bedroom":  &dynamodb.AttributeValue{S: aws.String("0.7")},
-							"Median_age_persons":            &dynamodb.AttributeValue{S: aws.String("36")},
-							"Median_mortgage_repay_monthly": &dynamodb.AttributeValue{S: aws.String("2470")},
-							"Median_rent_weekly":            &dynamodb.AttributeValue{S: aws.String("450")},
-							"Median_tot_fam_inc_weekly":     &dynamodb.AttributeValue{S: aws.String("2646")},
-							"Median_tot_hhd_inc_weekly":     &dynamodb.AttributeValue{S: aws.String("2330")},
-							"Median_tot_prsnl_inc_weekly":   &dynamodb.AttributeValue{S: aws.String("1132")},
-							"SA1_7DIGITCODE_2016":           &dynamodb.AttributeValue{S: aws.String("1101101")}},
+							"Average_household_size":        &dynamodb.AttributeValue{N: aws.String("2.7")},
+							"Average_num_psns_per_bedroom":  &dynamodb.AttributeValue{N: aws.String("0.7")},
+							"Median_age_persons":            &dynamodb.AttributeValue{N: aws.String("36")},
+							"Median_mortgage_repay_monthly": &dynamodb.AttributeValue{N: aws.String("2470")},
+							"Median_rent_weekly":            &dynamodb.AttributeValue{N: aws.String("450")},
+							"Median_tot_fam_inc_weekly":     &dynamodb.AttributeValue{N: aws.String("2646")},
+							"Median_tot_hhd_inc_weekly":     &dynamodb.AttributeValue{N: aws.String("2330")},
+							"Median_tot_prsnl_inc_weekly":   &dynamodb.AttributeValue{N: aws.String("1132")},
+							"SA1_7DIGITCODE_2016":           &dynamodb.AttributeValue{N: aws.String("1101101")}},
 					},
 				},
 			},
@@ -75,22 +75,22 @@ func TestHandleRequest(t *testing.T) {
 		GetItemResponse: dynamodb.GetItemOutput{},
 	}
 
-	d := deps{
+	d := Dependencies{
 		ddb:     m,
 		tableID: "testTable",
 	}
 
-	mr0 := MapRequest{
+	mr0 := MapDataRequest{
 		RegionID:    "789123",
 		PartitionID: "G02",
 	}
 
-	mr1 := MapRequest{
+	mr1 := MapDataRequest{
 		RegionID:    "123456",
 		PartitionID: "G02",
 	}
 
-	mr := []MapRequest{}
+	mr := []MapDataRequest{}
 
 	mr = append(mr, mr0, mr1)
 
@@ -103,7 +103,7 @@ func TestHandleRequest(t *testing.T) {
 
 	x, _ := d.HandleRequest(req)
 
-	fmt.Println("output")
+	fmt.Print("\n----\n")
 	fmt.Println("x")
 	fmt.Println(x)
 
