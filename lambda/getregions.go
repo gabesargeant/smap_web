@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"smap/record"
@@ -32,15 +33,30 @@ type deps struct {
 
 // HandleRequest Main entry point for Lambda
 func (d *deps) HandleRequest(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-
+	var response events.APIGatewayProxyResponse
 	var request []MapRequest
 	db := d.ddb
 	table := d.tableID
+
+	fmt.Print(req)
+	fmt.Print("Req Body")
+	fmt.Print(req.Body)
+
+	// data, err := base64.StdEncoding.DecodeString(req.Body)
+
+	// if err != nil {
+	// 	fmt.Println("Error with base64 decode")
+	// 	fmt.Println(req.Body)
+	// 	fmt.Println(err)
+	// }
 
 	err := json.Unmarshal([]byte(req.Body), &request)
 
 	if err != nil {
 		fmt.Println("Error with unmarshalling request")
+		fmt.Println(req.Body)
+		fmt.Println(err)
+		return response, errors.New("error with unmarshalling request")
 	}
 	//Validate Requests and trim long requests
 	if len(request) >= 100 {
@@ -55,9 +71,12 @@ func (d *deps) HandleRequest(req events.APIGatewayProxyRequest) (events.APIGatew
 	//Potentially expand the response body to include an set of errors that can be shown by the UI.
 	//maybe....
 
-	response := events.APIGatewayProxyResponse{}
 	b, _ := json.Marshal(result)
 	response.Body = string(b)
+	response.StatusCode = 200
+
+	fmt.Print(response)
+	fmt.Print(response.Body)
 
 	return response, nil
 }
