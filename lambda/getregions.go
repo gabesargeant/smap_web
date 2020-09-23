@@ -5,75 +5,87 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"smap/record"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-// MapRequest  details TODO Eventually replace this with an
+// MapDataRequest  details TODO Eventually replace this with an
 // interface type for the APIGateway Request
-type MapRequest struct {
+type MapDataRequest struct {
 	RegionID    string `json:"RegionID"`
 	PartitionID string `json:"PartitionID"`
 }
 
-// Pointer Receiver based dependency injection
-type deps struct {
+// MapData a struct used to create a json object representing a region ID and then a set of key value pairs of data.
+type MapData struct {
+	RegionID    string             `json:"RegionID"`
+	PartitionID string             `json:"PartitionID"` //TODO change this to partionID
+	KVPairs     map[string]float64 `json:"KVPairs"`
+}
+
+// MapDataResponse is the container for both any app errors and the data
+type MapDataResponse struct {
+	Errors  []string  `json:"Errors,omitempty"`
+	MapData []MapData `json:"MapData"`
+}
+
+// Dependencies - Pointer Receiver based dependency injection
+type Dependencies struct {
 	ddb     dynamodbiface.DynamoDBAPI
 	tableID string
 }
 
-// HandleRequest Main entry point for Lambda
-func (d *deps) HandleRequest(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+// HandleRequest Main entry point for the Lambda
+func (d *Dependencies) HandleRequest(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
 	var response events.APIGatewayProxyResponse
-	var request []MapRequest
-	db := d.ddb
-	table := d.tableID
+	var mapDataResponse MapDataResponse
 
-	fmt.Print(req)
-	fmt.Print("Req Body")
-	fmt.Print(req.Body)
-
-	// data, err := base64.StdEncoding.DecodeString(req.Body)
-
-	// if err != nil {
-	// 	fmt.Println("Error with base64 decode")
-	// 	fmt.Println(req.Body)
-	// 	fmt.Println(err)
-	// }
-
+	var request []MapDataRequest
 	err := json.Unmarshal([]byte(req.Body), &request)
 
 	if err != nil {
 		fmt.Println("Error with unmarshalling request")
 		fmt.Println(req.Body)
-		fmt.Println(err)
+
+		response.StatusCode = 500
+		s := []string{fmt.Sprint(err)}
+		mapDataResponse.Errors = s
+
+		b, _ := json.Marshal(mapDataResponse)
+		response.Body = string(b)
+
 		return response, errors.New("error with unmarshalling request")
 	}
+
 	//Validate Requests and trim long requests
 	if len(request) >= 100 {
 		request = request[:99]
 		fmt.Println("Trim request to 100 objects max")
 	}
 
-	// Request items from DB
-	result := getBatchData(request, db, table)
+	// Request items from DB.
+	db := d.ddb
+	table := d.tableID
 
-	//Todo do something with errors in response object
-	//Potentially expand the response body to include an set of errors that can be shown by the UI.
-	//maybe....
+	mapDataResponse = getBatchData(request, db, table)
 
-	b, _ := json.Marshal(result)
-	response.Body = string(b)
-	response.StatusCode = 200
+	b, err := json.Marshal(mapDataResponse)
+	if err != nil {
+
+	} else {
+		response.Body = string(b)
+		response.StatusCode = 200
+	}
 
 	fmt.Print(response)
 	fmt.Print(response.Body)
@@ -84,7 +96,7 @@ func (d *deps) HandleRequest(req events.APIGatewayProxyRequest) (events.APIGatew
 // main Establish Go session and call lambda start with pointer receiver.
 func main() {
 
-	d := deps{
+	d := Dependencies{
 		ddb:     dynamodb.New(session.New()),
 		tableID: os.Getenv("DYNAMOTABLE"),
 	}
@@ -93,7 +105,7 @@ func main() {
 }
 
 // getBrachData - Makes requests on dynamodb with a batch interface.
-func getBatchData(requests []MapRequest, ddb dynamodbiface.DynamoDBAPI, dbTable string) []record.Record {
+func getBatchData(requests []MapDataRequest, ddb dynamodbiface.DynamoDBAPI, dbTable string) MapDataResponse {
 
 	mapOfKeys := []map[string]*dynamodb.AttributeValue{}
 
@@ -120,48 +132,57 @@ func getBatchData(requests []MapRequest, ddb dynamodbiface.DynamoDBAPI, dbTable 
 
 	batch, err := ddb.BatchGetItem(input)
 
+	var errors []string
+
 	if err != nil {
-		processErrors(err)
-		panic(fmt.Errorf("Batch get item failed, err: %w", err))
+		errors = append(errors, processErrors(err))
 	}
 
-	var fullResults []record.Record
+	var fullResults []MapData
 
 	for _, response := range batch.Responses {
 		for _, item := range response {
 
-			var record record.Record
-			err := dynamodbattribute.UnmarshalMap(item, &record)
+			var result MapData
+			err := dynamodbattribute.UnmarshalMap(item, &result)
+
 			if err != nil {
 
+				errorMsg := fmt.Sprint(err)
+				errors = append(errors, errorMsg)
+
 			}
-
-			fullResults = append(fullResults, record)
-
+			fullResults = append(fullResults, result)
 		}
 	}
-	return fullResults
+
+	mapDataResponse := MapDataResponse{
+		MapData: fullResults,
+		Errors:  errors,
+	}
+
+	return mapDataResponse
 }
 
-func processErrors(err error) {
+func processErrors(err error) string {
+	var errorMessage string
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case dynamodb.ErrCodeProvisionedThroughputExceededException:
-				fmt.Println(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
+				errorMessage = fmt.Sprint(dynamodb.ErrCodeProvisionedThroughputExceededException, aerr.Error())
 			case dynamodb.ErrCodeResourceNotFoundException:
-				fmt.Println(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
+				errorMessage = fmt.Sprint(dynamodb.ErrCodeResourceNotFoundException, aerr.Error())
 			case dynamodb.ErrCodeRequestLimitExceeded:
-				fmt.Println(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
+				errorMessage = fmt.Sprint(dynamodb.ErrCodeRequestLimitExceeded, aerr.Error())
 			case dynamodb.ErrCodeInternalServerError:
-				fmt.Println(dynamodb.ErrCodeInternalServerError, aerr.Error())
+				errorMessage = fmt.Sprint(dynamodb.ErrCodeInternalServerError, aerr.Error())
 			default:
-				fmt.Println(aerr.Error())
+				errorMessage = fmt.Sprint(aerr.Error())
 			}
 		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
+			errorMessage = fmt.Sprint(err.Error())
 		}
 	}
+	return errorMessage
 }
