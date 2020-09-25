@@ -11,7 +11,6 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -34,8 +33,9 @@ type MapData struct {
 
 // MapDataResponse is the container for both any app errors and the data
 type MapDataResponse struct {
-	Errors  []string  `json:"Errors,omitempty"`
-	MapData []MapData `json:"MapData"`
+	Errors   []string          `json:"Errors,omitempty"`
+	MapData  []MapData         `json:"MapData"`
+	Metadata map[string]string `json:"Metadata"`
 }
 
 // Dependencies - Pointer Receiver based dependency injection
@@ -78,6 +78,13 @@ func (d *Dependencies) HandleRequest(req events.APIGatewayProxyRequest) (events.
 	table := d.tableID
 
 	mapDataResponse = getBatchData(request, db, table)
+
+	//getMetadata
+	//This could be a slow point.
+	//Most likely slow on startup / cold start
+	metadataTableLookup := request[0].PartitionID
+	fmt.Printf("Metadata ID ==== %s", metadataTableLookup)
+	mapDataResponse.Metadata = MetadataMapMap[metadataTableLookup]
 
 	b, err := json.Marshal(mapDataResponse)
 	if err != nil {
