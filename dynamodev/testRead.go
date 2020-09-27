@@ -68,6 +68,7 @@ func defineFlags() Args {
 	return args
 }
 
+//MapRequest - the incoming request structure.
 type MapRequest struct {
 	RegionID    string `json:"RegionID"`
 	PartitionID string `json:"PartitionID"`

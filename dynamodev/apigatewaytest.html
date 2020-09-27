@@ -8,50 +8,42 @@
     <meta name="description" content="">
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 <body>
-    <script>
-        $(document).ready(function () {
-            $("button").click(function () {
-                $.ajax({
-                    type: "POST",
-                    url: "https://rk3bg3bq6k.execute-api.ap-southeast-2.amazonaws.com/prod/smap/getregions",
-                    headers: {
-                        "Access-Control-Allow-Origin": "rk3bg3bq6k.execute-api.ap-southeast-2.amazonaws.com"
-                    },
-                    crossDomain: true,
-                    crossOrigin: null,
-                    data: JSON.stringify([{
-                        "RegionId": "1101119",
-                        "PartitionID": "G02"
-                    }, {
-                        "RegionId": "1101119",
-                        "PartitionID": "G02"
-                    }]),
-                    crossDomain: true,
-                    contentType: "application/json",
-                    success: function (data) {
-                        alert('call back');
-                        $("#out").text(data);
-                    },
-                    error: function (jqXHR, textStatus, errorThrown) {
-                        alert("Error, status = " + textStatus + ", " + "error thrown: " + errorThrown + "\n " + jqXHR);
-                        console.log(jqXHR)
-                    }
-                });
+    <textarea type="text" rows="10" id="dataArray"
+        style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box; width: 100%; resize: horizontal;">
+    {"RegionId": "1101119" , "PartitionID" : "G02" }, { "RegionId" : "1101117" , "PartitionID" : "G02"}</textarea>
 
-            });
-        });
-    </script>
-    <button>test get regions</button>
+    <button id="btn">test get regions</button>
     <div id="out"></div>
 
 
 </body>
+<script>
+    function getDataFromAPI() {
+        var request = document.getElementById('dataArray').value;
+        request = request.trim()
+        fetch('https://api.gabrielsargeant.com/app/smap/getregions', {
+            method: 'post',
+            body: request,
 
+        }).then(function (response) {
+            console.log('success + ' + response);
+            console.log(response)
+            document.getElementById('out').innerHTML = response;
+            return response;
+        });
+
+    }
+
+    var btn = document.getElementById('btn');
+    btn.addEventListener('click', getDataFromAPI);
+
+
+
+</script>
 
 
 </html>

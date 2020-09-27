@@ -1,13 +1,5 @@
 [
     {
-        "RegionId": "1100701",
-        "PartitionID": "G02"
-    },
-    {
-        "RegionId": "1100702",
-        "PartitionID": "G02"
-    },
-    {
         "RegionId": "1100703",
         "PartitionID": "G02"
     },
