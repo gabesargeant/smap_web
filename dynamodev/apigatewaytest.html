@@ -9,37 +9,51 @@
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--This is easier than setting up the express server or some other solution-->
+    <script type="text/javascript" src="dataFile.js"></script>
+    <link rel="stylesheet" href="databymap.css">
+
 </head>
 
 <body>
     <textarea type="text" rows="10" id="dataArray"
         style="-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box; width: 100%; resize: horizontal;">
-    {"RegionId": "1101119" , "PartitionID" : "G02" }, { "RegionId" : "1101117" , "PartitionID" : "G02"}</textarea>
+    {"RegionId": "1101119" , "PartitionID" : "G02" }, { "RegionId" : "1101117" , "PartitionID" : "G02"}
 
-    <button id="btn">test get regions</button>
+
+
+</textarea>
+
+    <button id="btn">test get regions</button><button id="clearbtn">clear</button>
     <div id="out"></div>
 
 
+    <div id="dataTable"></div>
+
 </body>
 <script>
+
+
+
     function getDataFromAPI() {
-        var request = document.getElementById('dataArray').value;
-        request = request.trim()
-        fetch('https://api.gabrielsargeant.com/app/smap/getregions', {
-            method: 'post',
-            body: request,
+        //Put the fetch here for requesting the data once everything else is built
+        //document.getElementById('out').innerHTML = JSON.stringify(dataResponse);
 
-        }).then(function (response) {
-            console.log('success + ' + response);
-            console.log(response)
-            document.getElementById('out').innerHTML = response;
-            return response;
-        });
 
+        table = buildTableFromMapDataResponse(dataResponse)
+        document.getElementById('out').innerHTML = table;
+
+    }
+
+    function clear() {
+        document.getElementById('out').innerHTML = "";
     }
 
     var btn = document.getElementById('btn');
     btn.addEventListener('click', getDataFromAPI);
+
+    var clearbtn = document.getElementById('clearbtn');
+    clearbtn.addEventListener('click', clear);
 
 
 
