@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="author" content="">
+    <meta name="description" content="">
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--This is easier than setting up the express server or some other solution-->
+    <script type="text/javascript" src="dataFile.js"></script>
+    <link rel="stylesheet" href="databymap.css">
+
+</head>
+
+<body>
+    <div id="containerDiv">
+        <div id="banner">
+
+            <h1>Serverless Mapping, Visulizations, and a whole swag of Data</h1>
+            <h4>Read about it at <a href="www.gabrielsargeant.com" targer="_blank">gabrielsargeant.com</a></h4>
+
+            <div id="controlPane">
+                Select Layer Type :
+                <select id="selectLayer" name="selectLayer" class="select-style">
+                    <option value="1" selected="selected">Select the Level of Detail</option>
+                    <option value="0">Australia</option>
+                    <option value="1">State/Territory</option>
+                    <option value="2">Statistical Area Level 4</option>
+                    <option value="3">Statistical Area Level 3</option>
+                    <option value="4">Statistical Area Level 2</option>
+                    <option value="5">Statistical Area Level 1 (Zoom in!)</option>
+                    <option value="6">State Suburbs (Zoom in!)</option>
+                    <option value="7">Postal Areas (Zoom in!)</option>
+                    <option value="8">Greater Capital City Statistical Areas</option>
+                    <option value="9">Commonwealth Electoral Divisions</option>
+                    <option value="10">State Electoral Divisions</option>
+                    <option value="11">Local Government Areas</option>
+
+                </select>
+
+                <button id="selectAreaBtn">Select Area</button>
+                <button id="queryBtn">Get Data For Selection</button>
+                <button id="resetBtn">Reset</button>
+                <button id="mapUpBtn">Map</button>
+                <button id="topicUpBtn">Data Topics</button>
+                <button id="dataUpBtn">Data Table</button>
+
+            </div>
+        </div>
+
+
+        <div id="mapDiv" style="z-index: 0;">
+            <h1>im the map</h1>
+        </div>
+        <div id="topicDiv" style="z-index: -1;">
+            <h1>im the topics</h1>
+        </div>
+        <div id="dataDiv" style="z-index: -2;">
+            <h1>im the data</h1><br />
+            <hr />
+            <div id="dataTable" class="dataTable"></div>
+        </div>
+    </div>
+
+    <script>
+
+        function rotateViews() {
+            mapIndex = document.getElementById("mapDiv").style.zIndex;
+            topicIndex = document.getElementById("topicDiv").style.zIndex;
+            dataIndex = document.getElementById("dataDiv").style.zIndex;
+
+            position = [topicIndex, dataIndex, mapIndex];
+
+            document.getElementById('mapDiv').style.zIndex = position[0];
+            document.getElementById('topicDiv').style.zIndex = position[1];
+            document.getElementById('dataDiv').style.zIndex = position[2];
+
+        }
+        //Display Map
+        function mapUp() {
+            document.getElementById('mapDiv').style.zIndex = 0;
+            document.getElementById('topicDiv').style.zIndex = -1;
+            document.getElementById('dataDiv').style.zIndex = -2;
+
+        }
+        //Display data
+        function dataUp() {
+            document.getElementById('dataDiv').style.zIndex = 0;
+            document.getElementById('mapDiv').style.zIndex = -1;
+            document.getElementById('topicDiv').style.zIndex = -2;
+
+        }
+        //Disply Topics
+        function topicUp() {
+            document.getElementById('topicDiv').style.zIndex = 0;
+            document.getElementById('mapDiv').style.zIndex = -1;
+            document.getElementById('dataDiv').style.zIndex = -2;
+        }
+
+        function visualizeCol(id) {
+            mapUp();
+            console.log(id);
+        }
+
+        function getDataFromAPI() {
+            //Put the fetch here for requesting the data once everything else is built
+            //document.getElementById('out').innerHTML = JSON.stringify(dataResponse);
+
+            //Also put the callback to pivot the view
+
+
+            table = buildTableFromMapDataResponse(dataResponse)
+            document.getElementById('dataTable').innerHTML = table;
+            dataUp()
+        }
+
+        function clear() {
+            document.getElementById('dataTable').innerHTML = "";
+        }
+
+        var queryBtn = document.getElementById('queryBtn');
+        queryBtn.addEventListener('click', getDataFromAPI);
+
+        var resetBtn = document.getElementById('resetBtn');
+        resetBtn.addEventListener('click', clear);
+
+        var mapUpBtn = document.getElementById('mapUpBtn');
+        mapUpBtn.addEventListener('click', mapUp)
+
+        var topicUpBtn = document.getElementById('topicUpBtn');
+        topicUpBtn.addEventListener('click', topicUp)
+
+        var dataUpBtn = document.getElementById('dataUpBtn');
+        dataUpBtn.addEventListener('click', dataUp)
+
+
+
+    </script>
+</body>
+
+</html>
