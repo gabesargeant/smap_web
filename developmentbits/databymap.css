@@ -43,6 +43,8 @@ overflow: scroll;
 	min-height: 70%;
 	height:80%;
 }
+
+
  
 .banner{
 	overflow: hidden;
@@ -133,6 +135,12 @@ overflow: scroll;
 table.dataTable tr:not(:nth-child(1)):hover {
 	background-color: #e6b4c0;
 }
+
+tabel.dataTable td,th {
+	max-width: 90pt;
+	text-align: left;
+}
+
 
 
 

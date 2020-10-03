@@ -9,8 +9,8 @@
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!--This is easier than setting up the express server or some other solution-->
-    <script type="text/javascript" src="dataFile.js"></script>
+
+
     <link rel="stylesheet" href="databymap.css">
 
 </head>
@@ -19,8 +19,8 @@
     <div id="containerDiv">
         <div id="banner">
 
-            <h1>Serverless Mapping, Visulizations, and a whole swag of Data</h1>
-            <h4>Read about it at <a href="www.gabrielsargeant.com" targer="_blank">gabrielsargeant.com</a></h4>
+            <h1>Serverless Mapping, Visualizations, and a whole swag of Data</h1>
+            <h4>Read about it at <a href="https://www.gabrielsargeant.com" target="_blank">gabrielsargeant.com</a></h4>
 
             <div id="controlPane">
                 Select Layer Type :
@@ -65,80 +65,8 @@
         </div>
     </div>
 
-    <script>
-
-        function rotateViews() {
-            mapIndex = document.getElementById("mapDiv").style.zIndex;
-            topicIndex = document.getElementById("topicDiv").style.zIndex;
-            dataIndex = document.getElementById("dataDiv").style.zIndex;
-
-            position = [topicIndex, dataIndex, mapIndex];
-
-            document.getElementById('mapDiv').style.zIndex = position[0];
-            document.getElementById('topicDiv').style.zIndex = position[1];
-            document.getElementById('dataDiv').style.zIndex = position[2];
-
-        }
-        //Display Map
-        function mapUp() {
-            document.getElementById('mapDiv').style.zIndex = 0;
-            document.getElementById('topicDiv').style.zIndex = -1;
-            document.getElementById('dataDiv').style.zIndex = -2;
-
-        }
-        //Display data
-        function dataUp() {
-            document.getElementById('dataDiv').style.zIndex = 0;
-            document.getElementById('mapDiv').style.zIndex = -1;
-            document.getElementById('topicDiv').style.zIndex = -2;
-
-        }
-        //Disply Topics
-        function topicUp() {
-            document.getElementById('topicDiv').style.zIndex = 0;
-            document.getElementById('mapDiv').style.zIndex = -1;
-            document.getElementById('dataDiv').style.zIndex = -2;
-        }
-
-        function visualizeCol(id) {
-            mapUp();
-            console.log(id);
-        }
-
-        function getDataFromAPI() {
-            //Put the fetch here for requesting the data once everything else is built
-            //document.getElementById('out').innerHTML = JSON.stringify(dataResponse);
-
-            //Also put the callback to pivot the view
-
-
-            table = buildTableFromMapDataResponse(dataResponse)
-            document.getElementById('dataTable').innerHTML = table;
-            dataUp()
-        }
-
-        function clear() {
-            document.getElementById('dataTable').innerHTML = "";
-        }
-
-        var queryBtn = document.getElementById('queryBtn');
-        queryBtn.addEventListener('click', getDataFromAPI);
-
-        var resetBtn = document.getElementById('resetBtn');
-        resetBtn.addEventListener('click', clear);
-
-        var mapUpBtn = document.getElementById('mapUpBtn');
-        mapUpBtn.addEventListener('click', mapUp)
-
-        var topicUpBtn = document.getElementById('topicUpBtn');
-        topicUpBtn.addEventListener('click', topicUp)
-
-        var dataUpBtn = document.getElementById('dataUpBtn');
-        dataUpBtn.addEventListener('click', dataUp)
-
-
-
-    </script>
 </body>
+<script type="text/javascript" src="dataFile.js"></script>
+<script type="text/javascript" src="ui.js"></script>
 
 </html>

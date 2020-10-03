@@ -54,13 +54,13 @@ function buildTableHeaderString(metadata, metadataMap) {
             val = key
         }
 
-        header += "<th id='" + key + "'>" + val + "<nr>"
-        header += "<input id='" + key + "' type='button' value='Visualize this data' onclick='visualizeCol(this.id)'/></th>"
-
+        header += "<th id='" + key + "'>"
+        // header += "<input id='" + key + "' type='button' value='Visualize this data' onclick='visualizeCol(this.id)'/></th>"
+        header += "<a id='" + key + "' href='#' onclick='visualizeCol(this.id)'>" + val + "</a></th>"
         sequence++
     }
 
-    header += "</th>"
+    header += "</tr>"
     return [header, headerSequenceMap]
 }
 
