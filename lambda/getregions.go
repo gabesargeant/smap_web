@@ -27,7 +27,8 @@ type MapDataRequest struct {
 // MapData a struct used to create a json object representing a region ID and then a set of key value pairs of data.
 type MapData struct {
 	RegionID    string             `json:"RegionID"`
-	PartitionID string             `json:"PartitionID"` //TODO change this to partionID
+	PartitionID string             `json:"PartitionID"`
+	GeoLevel    string             `json:"GeoLevel"`
 	KVPairs     map[string]float64 `json:"KVPairs"`
 }
 
