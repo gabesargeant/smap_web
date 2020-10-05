@@ -52,6 +52,7 @@ func (d *Dependencies) HandleRequest(req events.APIGatewayProxyRequest) (events.
 	var mapDataResponse MapDataResponse
 
 	var request []MapDataRequest
+	fmt.Println(request)
 	err := json.Unmarshal([]byte(req.Body), &request)
 
 	if err != nil {
@@ -70,8 +71,9 @@ func (d *Dependencies) HandleRequest(req events.APIGatewayProxyRequest) (events.
 
 	//Validate Requests and trim long requests
 	if len(request) >= 100 {
-		request = request[:99]
 		fmt.Println("Trim request to 100 objects max")
+		request = request[:99]
+
 	}
 
 	// Request items from DB.
@@ -83,20 +85,27 @@ func (d *Dependencies) HandleRequest(req events.APIGatewayProxyRequest) (events.
 	//getMetadata
 	//This could be a slow point.
 	//Most likely slow on startup / cold start
+	fmt.Println("get the index that doesn't exists thingy")
+	fmt.Println(request[0].PartitionID)
 	metadataTableLookup := request[0].PartitionID
-	fmt.Printf("Metadata ID ==== %s", metadataTableLookup)
+	fmt.Println("Metadata ID ==== :" + metadataTableLookup)
 	mapDataResponse.Metadata = MetadataMapMap[metadataTableLookup]
 
 	b, err := json.Marshal(mapDataResponse)
+
 	if err != nil {
+		fmt.Println("error with marshalling request")
+		response.StatusCode = 500
+		s := []string{fmt.Sprint(err)}
+		mapDataResponse.Errors = s
 
 	} else {
 		response.Body = string(b)
 		response.StatusCode = 200
 	}
 
-	fmt.Print(response)
-	fmt.Print(response.Body)
+	//fmt.Print(response)
+	//fmt.Print(response.Body)
 
 	return response, nil
 }
