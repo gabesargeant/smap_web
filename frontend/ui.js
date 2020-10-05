@@ -45,19 +45,6 @@ async function getDataFromAPI() {
 
 }
 
-// async function fetchDataFromAPI() {
-
-//     var getdata = await getDataFromAPI();
-
-//     getdata.then(data => {
-//         console.log(data);
-//         table = buildTableFromMapDataResponse(data)
-//         document.getElementById('dataTable').innerHTML = table;
-//         dataUp()
-//     });
-
-
-// }
 
 
 
@@ -66,8 +53,8 @@ function clear() {
     mapUp();
 }
 
-var queryBtn = document.getElementById('queryBtn');
-queryBtn.addEventListener('click', getDataFromAPI);
+// var queryBtn = document.getElementById('queryBtn');
+// queryBtn.addEventListener('click', getDataFromAPI);
 
 var resetBtn = document.getElementById('resetBtn');
 resetBtn.addEventListener('click', clear);
@@ -95,18 +82,3 @@ class MapRequest {
 
 }
 
-function buildAPIRequest(selectedLayers) {
-
-    var mapRequestArr = [];
-    //get the topic selected in the topic div
-    var topic = document.querySelector('input[name="topic"]:checked').value;
-
-    for (var i = 1; i < selectedLayers.length; i++) {
-        mr = new MapRequest(selectedLayers[i], topic);
-        mapRequestArr.push(mr);
-
-    }
-
-    return mapRequestArr;
-
-}

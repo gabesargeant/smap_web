@@ -227,6 +227,8 @@ require([
         layerID = map.graphicsLayerIds[e.target.value];
         layer = map.getLayer(layerID);
         layer.setVisibility(true);
+
+
         currentLayer = layer;
         currentSelection = null;
 
@@ -264,19 +266,29 @@ require([
             }
 
         }
+
         code = getLayerAttributesGIS(layerNum);
-        selectedRegions.push(code);
         //hard 100 geo limit!
+        mapRequests = [];
+        //get the topic selected in the topic div
+        var topic = document.querySelector('input[name="topic"]:checked').value;
+
         for (var i = 0; i < selection.length && i < 100; i++) {
+
             value = selection[i].attributes[code];
             selectedRegions.push(value);
+            mr = new MapRequest(value, topic);
+            mapRequests.push(mr);
 
         }
-        mapRequests = buildAPIRequest(selectedRegions)
+
         console.log(mapRequests)
         console.log(JSON.stringify(mapRequests))
 
         document.getElementById("queryBtn").disabled = false;
+
+
+        getDataFromAPI()
 
     });
 

@@ -86,10 +86,15 @@ func (d *Dependencies) HandleRequest(req events.APIGatewayProxyRequest) (events.
 	//This could be a slow point.
 	//Most likely slow on startup / cold start
 	fmt.Println("get the index that doesn't exists thingy")
-	fmt.Println(request[0].PartitionID)
-	metadataTableLookup := request[0].PartitionID
-	fmt.Println("Metadata ID ==== :" + metadataTableLookup)
-	mapDataResponse.Metadata = MetadataMapMap[metadataTableLookup]
+
+	if len(request) == 0 {
+		response.StatusCode = 500
+		s := []string{fmt.Sprint("Empty Request Array")}
+		mapDataResponse.Errors = s
+		return response, errors.New("error with empty request array")
+	}
+
+	mapDataResponse.Metadata = MetadataMapMap[request[0].PartitionID]
 
 	b, err := json.Marshal(mapDataResponse)
 
