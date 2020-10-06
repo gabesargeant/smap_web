@@ -23,6 +23,7 @@
             <h4>Read about it at <a href="https://www.gabrielsargeant.com" target="_blank">gabrielsargeant.com</a></h4>
 
             <div id="controlPane">
+                <button id="topicUpBtn">Data Topics</button>
                 Select Layer Type :
                 <select id="selectLayer" name="selectLayer" class="select-style">
                     <option value="1" selected="selected">Select the Level of Detail</option>
@@ -39,7 +40,7 @@
                     <option value="10">Local Government Areas</option>
 
                 </select>
-                <button id="topicUpBtn">Data Topics</button>
+
                 <button id="selectAreaBtn">Select Area</button>
                 <button id="queryBtn">Get Data For Selection</button>
                 <button id="resetBtn">Reset</button>
@@ -47,43 +48,82 @@
                 <button id="dataUpBtn">Data Table</button>
 
             </div>
+            <div id="errorMsg">
+
+            </div>
         </div>
+        <hr />
 
 
         <div id="mapDiv" style="z-index: 0;">
-
         </div>
+
         <div id="topicDiv" style="z-index: -1;">
-            <h1>im the topics</h1>
-            <input type='radio' id='G01' name='topic' value='G01' /> Selected Person Characteristics by Sex<br />
-            <input type='radio' id='G02' name='topic' value='G02' checked="checked" /> Selected Medians and
-            Averages<br />
-            <input type='radio' id='G04' name='topic' value='G04' /> Age by Sex<br />
-            <input type='radio' id='G05' name='topic' value='G05' /> Registered Marital Status by Age by Sex<br />
-            <input type='radio' id='G07' name='topic' value='G07' /> Indigenous Status by Age by Sex<br />
-            <input type='radio' id='G08' name='topic' value='G08' /> Ancestry by Country of Birth of Parents<br />
-            <input type='radio' id='G25' name='topic' value='G25' /> Family Composition<br />
-            <input type='radio' id='G27' name='topic' value='G27' /> Family Blending<br />
-            <input type='radio' id='G28' name='topic' value='G28' /> Total Family Income (Weekly) by Family
-            Composition<br />
-            <input type='radio' id='G29' name='topic' value='G29' /> Total Household Income (Weekly) by Household
-            Composition<br />
-            <input type='radio' id='G30' name='topic' value='G30' /> Number of Motor Vehicles by Dwellings<br />
-            <input type='radio' id='G31' name='topic' value='G31' /> Household Composition by Number of Persons Usually
-            Resident<br />
-            <input type='radio' id='G59' name='topic' value='G59' /> Method of Travel to Work by Sex<br />
+            <div id="topicList">
+                <h1>Topics</h1>
+                <input type='radio' id='G01' name='topic' value='G01' />
+                <span> Selected Person Characteristics by
+                    Sex<br />
+                </span>
+                <input type='radio' id='G02' name='topic' value='G02' checked="checked" />
+                <span>
+                    Selected Medians and Averages<br />
+                </span>
+                <input type='radio' id='G05' name='topic' value='G05' />
+                <span>
+                    Registered Marital Status by Age by Sex<br />
+                </span>
+                <input type='radio' id='G07' name='topic' value='G07' />
+                <span>
+                    Indigenous Status by Age by Sex<br /></span>
+                <input type='radio' id='G08' name='topic' value='G08' />
+                <span>
+                    Ancestry by Country of Birth of Parents<br /></span>
+                <input type='radio' id='G25' name='topic' value='G25' />
+                <span>
+                    Family Composition<br />
+                </span>
+                <input type='radio' id='G27' name='topic' value='G27' />
+                <span>
+                    Family Blending<br /></span>
+                <input type='radio' id='G28' name='topic' value='G28' />
+                <span>
+                    Total Family Income (Weekly) by Family Composition<br /></span>
+                <input type='radio' id='G29' name='topic' value='G29' />
+                <span>
+                    Total Household Income (Weekly) by Household Composition<br /></span>
+                <input type='radio' id='G30' name='topic' value='G30' />
+                <span>
+                    Number of Motor Vehicles by Dwellings<br />
+                </span>
+                <input type='radio' id='G31' name='topic' value='G31' />
+                <span>
+                    Household Composition by Number of Persons Usually Resident<br />
+                </span>
+                <input type='radio' id='G59' name='topic' value='G59' />
+                <span>
+                    Method of Travel to Work by Sex<br />
+                </span>
 
 
 
+            </div>
 
         </div>
         <div id="dataDiv" style="z-index: -2;">
-            <h1>im the data</h1><br />
-            <hr />
-            <div id="dataTable" class="dataTable"></div>
+            <div id="dataTableTitle">
+                <b></b> Data on : <span id="dataOnTopic"></span></b><br />
+                <span id="dataLevel"></span>
+                <hr />
+            </div>
+            <div id="dataTableContainer">
+                <div id="dataTable" class="dataTable"></div>
+            </div>
         </div>
+
         <img id="loadingImg" src="img/loading.gif" />
     </div>
+
 
 </body>
 <script type="text/javascript" src="dataFile.js"></script>

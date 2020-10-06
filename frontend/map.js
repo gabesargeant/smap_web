@@ -1,6 +1,7 @@
 //This is the basis for the Map Request Objects
 var mapRequests = [];
 var selectedRegions = [];
+latestRequestData = [];
 var map;
 
 require([
@@ -163,57 +164,9 @@ require([
         drawToolbar.activate(Draw.POLYGON);
     });
 
-    function zoomLevel(e) {
-        var code;
-        switch (e) {
-            case '0':
-                map.setZoom(4);
-                break;
-            case '1':
-                map.setZoom(4);
-                break;
-            case '2':
-                map.setZoom(4);
-                break;
-            case '3':
-                map.setZoom(7);
-                break;
-            case '4':
-                map.setZoom(9);
-                break;
-            case '5':
-                map.setZoom(12);
-                break;
-            case '6':
-                map.setZoom(12);
-                break;
-            case '7':
-                map.setZoom(10);
-                break;
-            case '8':
-                map.setZoom(4);
-                break;
-            case '9':
-                map.setZoom(7);
-                break;
-            case '10':
-                map.setZoom(7);
-                break;
-            case '11':
-                map.setZoom(7);
-                break;
-        }
-
-    }
-
     on(dom.byId('selectLayer'), 'change', function (e) {
         //make sure map is in focus
         mapUp()
-
-        zoomLevel(e.target.value);
-        if (e.target.value === 999) {
-            return 0;
-        }
 
         var layer;
         var layerID
@@ -227,7 +180,6 @@ require([
         layerID = map.graphicsLayerIds[e.target.value];
         layer = map.getLayer(layerID);
         layer.setVisibility(true);
-
 
         currentLayer = layer;
         currentSelection = null;
@@ -244,6 +196,9 @@ require([
 
 
     on(dom.byId('queryBtn'), 'click', function () {
+
+        showLoading();
+        document.getElementById('errorMsg').innerHTML = "";
         document.getElementById("queryBtn").disabled = true;
 
         selectedRegions.length = 0;
@@ -273,6 +228,13 @@ require([
         //get the topic selected in the topic div
         var topic = document.querySelector('input[name="topic"]:checked').value;
 
+        if (selection.length == 0) {
+            document.getElementById('errorMsg').innerHTML = "No Selection Made. Select over Australia";
+            hideLoading();
+            document.getElementById("queryBtn").disabled = false;
+            return;
+        }
+
         for (var i = 0; i < selection.length && i < 100; i++) {
 
             value = selection[i].attributes[code];
@@ -288,7 +250,7 @@ require([
         document.getElementById("queryBtn").disabled = false;
 
 
-        getDataFromAPI()
+        getDataFromAPI(hideLoading)
 
     });
 
