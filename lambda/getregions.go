@@ -27,6 +27,7 @@ type MapDataRequest struct {
 // MapData a struct used to create a json object representing a region ID and then a set of key value pairs of data.
 type MapData struct {
 	RegionID    string             `json:"RegionID"`
+	RegionName  string             `json:"RegionName"`
 	PartitionID string             `json:"PartitionID"`
 	GeoLevel    string             `json:"GeoLevel"`
 	KVPairs     map[string]float64 `json:"KVPairs"`
@@ -81,6 +82,10 @@ func (d *Dependencies) HandleRequest(req events.APIGatewayProxyRequest) (events.
 	table := d.tableID
 
 	mapDataResponse = getBatchData(request, db, table)
+	//Add name value.
+	for i := range mapDataResponse.MapData {
+		mapDataResponse.MapData[i].RegionName = NameIndex[mapDataResponse.MapData[i].RegionID]
+	}
 
 	//getMetadata
 	//This could be a slow point.
