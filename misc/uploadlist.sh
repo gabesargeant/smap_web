@@ -3,13 +3,13 @@
 # Run this relative to the dbbuilder dir.
 #
 touch loadOutput.txt
-./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G01_AUS_CED.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G01_AUS.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G01_AUS_GCCSA.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G01_AUS_LGA.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G01_AUS_POA.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G01_AUS_RA.csv.json >> loadOutput.txt
-./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G01_AUS_SA3.csv.json >> loadOutput.txt
+./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G01_AUS_SA2.csv.json >> loadOutput.txt
+./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G02_AUS_SA3.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G01_AUS_SA4.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G01_AUS_SED.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G01_AUS_SOS.csv.json >> loadOutput.txt
@@ -24,6 +24,7 @@ touch loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G02_AUS_LGA.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G02_AUS_POA.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G02_AUS_RA.csv.json >> loadOutput.txt
+./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G02_AUS_SA2.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G02_AUS_SA3.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G02_AUS_SA4.csv.json >> loadOutput.txt
 ./dbbuilder -n DPA_01 -l -f ../csvtransform/out_json/2016Census_G02_AUS_SED.csv.json >> loadOutput.txt
