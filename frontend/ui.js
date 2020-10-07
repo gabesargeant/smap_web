@@ -23,8 +23,11 @@ function topicUp() {
     document.getElementById('dataDiv').style.zIndex = -2;
 }
 
+//Maybe move this to map.js
 function visualizeCol(id) {
+    visDataField = 'Median_tot_fam_inc_weekly'
     mapUp();
+    visDataField = id;
     console.log("sentID :" + id);
     console.log(id);
 
@@ -44,7 +47,6 @@ async function getDataFromAPI(callback, tried) {
 
         console.log(data);
 
-
         if (!data.hasOwnProperty("message")) {
             latestRequestData = data
 
@@ -59,10 +61,6 @@ async function getDataFromAPI(callback, tried) {
             callback();
         }
 
-
-
-
-
     } catch (e) {
         console.log(e);
         console.log("trying again")
@@ -71,11 +69,6 @@ async function getDataFromAPI(callback, tried) {
         }
 
     }
-
-
-
-
-
 }
 
 
@@ -105,6 +98,15 @@ dataUpBtn.addEventListener('click', dataUp)
 //The select area button will drive a Esri JS event but also ensure that the map is visible
 var selectAreaEvent = document.getElementById('selectAreaBtn');
 selectAreaEvent.addEventListener('click', mapUp)
+
+
+//********************
+// Visualization test button, to be removed.
+//
+//
+var vizTestBtn = document.getElementById('vizTest');
+vizTestBtn.addEventListener('click', visualizeCol);
+
 
 //Represents the Map Request to be send the API
 class MapRequest {
