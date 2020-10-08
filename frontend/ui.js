@@ -26,8 +26,10 @@ function topicUp() {
 //Maybe move this to map.js
 function visualizeCol(id) {
     visDataField = 'Median_tot_fam_inc_weekly'
+    latestRequestData = mockdataResponse;
+    console.log(latestRequestData);
     mapUp();
-    visDataField = id;
+
     console.log("sentID :" + id);
     console.log(id);
 
@@ -49,6 +51,7 @@ async function getDataFromAPI(callback, tried) {
 
         if (!data.hasOwnProperty("message")) {
             latestRequestData = data
+            //setdatafield to be metadata array.
 
             table = buildTableFromMapDataResponse(data);
             document.getElementById('dataTable').innerHTML = table;

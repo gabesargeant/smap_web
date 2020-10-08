@@ -1,7 +1,7 @@
 //This is the basis for the Map Request Objects
 var mapRequests = [];
 var selectedRegions = [];
-latestRequestData = [];
+
 var map;
 var visDataField;
 var min_max = [0, 5000, 750];
@@ -54,16 +54,19 @@ require([
     "dojo/dom",
     "dojo/on",
     "esri/map",
+    "esri/geometry/Extent",
     "esri/InfoTemplate",
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol",
     "esri/layers/FeatureLayer",
+    "esri/renderers/ClassBreaksRenderer",
+
     "esri/graphic",
-    "esri/geometry/Extent",
+
     "esri/symbols/TextSymbol",
     "esri/Color",
     "esri/layers/LabelClass",
-    "esri/renderers/ClassBreaksRenderer",
+
     "esri/renderers/SimpleRenderer",
 
     "esri/toolbars/draw",
@@ -76,15 +79,16 @@ require([
     dom,
     on,
     Map,
+    Extent,
     InfoTemplate,
     SimpleLineSymbol,
     SimpleFillSymbol,
     FeatureLayer,
+    ClassBreaksRenderer,
+
     Graphic,
-    Extent,
     TextSymbol,
     LabelClass,
-    ClassBreaksRenderer,
     SimpleRenderer,
     Color,
     Draw,
@@ -134,7 +138,7 @@ require([
         for (var i = 0; i < map.graphicsLayerIds.length; i++) {
             layerID = map.graphicsLayerIds[i];
             layer = map.getLayer(layerID);
-            //console.log("this layer is number" + i + "and it is visible?" + layer.visible); 
+            //console.log("this layer is number " + i + " and it is visible?" + layer.visible);
             if (layer.visible) {
                 layerNum = i;
             }
@@ -143,11 +147,23 @@ require([
 
         code = getLayerAttributesGIS(layerNum);
 
+        console.log("this layer code is:")
+        console.log(code)
+
         var cdx = graphic.attributes[code];
         var val;
-        for (var i = 0; i < latestRequestData.length; i++) {
-            if (cdx.localeCompare(latestRequestData[i].RegionID) == 0) {
-                val = latestRequestData[i].KVPairs[visDataField];
+        console.log(latestRequestData.MapData.length)
+        for (var i = 0; i < latestRequestData.MapData.length; i++) {
+
+            //console.log(latestRequestData.MapData[i].RegionID)
+            console.log("cdx " + cdx);
+            if (cdx.localeCompare(latestRequestData.MapData[i].RegionID) == 0) {
+                valmap = latestRequestData.MapData[i].KVPairs
+                console.log('vis data : ' + visDataField);
+
+                console.log(valmap[visDataField])
+                val = valmap[visDataField];
+                console.log(val)
             }
         }
         return val;
@@ -465,10 +481,20 @@ require([
         $("#four_a").html(parseInt(stp5 - 1));
         $("#five_a").val(parseInt(top));
 
-        l_id = map.graphicsLayerIds[0];
+        // var layer;
+        // var layerID
+        // var layerNum
+        // for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+        //     layerID = map.graphicsLayerIds[i];
+        //     layer = map.getLayer(layerID);
+        //     //console.log("this layer is number" + i + "and it is visible?" + layer.visible); 
+        //     if (layer.visible) {
+        //         layerNum = i;
+        //     }
 
-        layer = map.getLayer(l_id);
-        map.removeLayer(layer);
+        // }
+
+        // map.removeLayer(layerNum);
 
         var __map_color = document.getElementById("selectColor");
         var mc_i = __map_color.options[__map_color.selectedIndex].value;
@@ -515,58 +541,51 @@ require([
 
         var ren = new ClassBreaksRenderer(symbol, findValue);
         ren.addBreak(stp1, stp2, new SimpleFillSymbol().setColor(new Color(c1)));
-        ren.addBreak(
-            stp2 + 1,
-            stp3,
-            new SimpleFillSymbol().setColor(new Color(c2))
-        );
-        ren.addBreak(
-            stp3 + 1,
-            stp4,
-            new SimpleFillSymbol().setColor(new Color(c3))
-        );
-        ren.addBreak(
-            stp4 + 1,
-            stp5,
-            new SimpleFillSymbol().setColor(new Color(c4))
-        );
+        ren.addBreak(stp2 + 1, stp3, new SimpleFillSymbol().setColor(new Color(c2)));
+        ren.addBreak(stp3 + 1, stp4, new SimpleFillSymbol().setColor(new Color(c3)));
+        ren.addBreak(stp4 + 1, stp5, new SimpleFillSymbol().setColor(new Color(c4)));
         ren.addBreak(stp5 + 1, top, new SimpleFillSymbol().setColor(new Color(c5)));
 
-        var fl = get_feature_layer(thematic_region);
+        // var fl = get_feature_layer(thematic_region);
 
-        fl.setRenderer(ren);
-        if (document.getElementById("check_label").checked == true) {
-            var label_text = new TextSymbol().setColor(new Color("#000"));
-            label_text.font.setSize("12pt");
-            label_text.font.setFamily("arial");
-            var json_label = {
-                labelExpressionInfo: {
-                    expression: "$feature." + thematic_code_name
-                }
-            };
-            var labelClass = new LabelClass(json_label);
-            labelClass.symbol = label_text;
-            fl.setLabelingInfo([labelClass]);
-        }
-        map.addLayer(fl);
+        currentLayer.setRenderer(ren);
+        // if (document.getElementById("check_label").checked == true) {
+        //     var label_text = new TextSymbol().setColor(new Color("#000"));
+        //     label_text.font.setSize("12pt");
+        //     label_text.font.setFamily("arial");
+        //     var json_label = {
+        //         labelExpressionInfo: {
+        //             expression: "$feature." + thematic_code_name
+        //         }
+        //     };
+        //     var labelClass = new LabelClass(json_label);
+        //     labelClass.symbol = label_text;
+        //     fl.setLabelingInfo([labelClass]);
+        // }
+        currentLayer.setVisibility(true);
+        map.addLayer(currentLayer);
 
-        var ext_arr = [];
-        for (var i = 0; i < featureLayer.graphics.length; i++) {
-            var graphic = featureLayer.graphics[i];
-            var cdx = graphic.attributes[thematic_region];
 
-            for (ii = 0; ii < data.length; ii++) {
-                if (cdx.localeCompare(data[ii][0]) === 0) {
-                    ext = new Extent(graphic.geometry.getExtent());
+        // code = getLayerAttributesGIS(layerNum)
 
-                    ext_arr.push(ext);
-                }
-            }
-        }
-        ext1 = ext_arr[0];
-        for (j = 1; j < ext_arr.length; j++) {
-            ext1 = ext1.union(ext_arr[j]);
-        }
-        map.setExtent(ext1.expand(1.25));
+        // var ext_arr = [];
+        // for (var i = 0; i < currentLayer.graphics.length; i++) {
+        //     var graphic = currentLayer.graphics[i];
+        //     var cdx = graphic.attributes[code];
+
+        //     for (ii = 0; ii < data.length; ii++) {
+        //         if (cdx.localeCompare(data[ii][0]) === 0) {
+        //             ext = new Extent(graphic.geometry.getExtent());
+
+        //             ext_arr.push(ext);
+        //         }
+        //     }
+        // }
+        // var ext1 = ext_arr[0];
+        // for (j = 1; j < ext_arr.length; j++) {
+        //     ext1 = ext1.union(ext_arr[j]);
+        // }
+        // console.log(ext1)
+        // map.setExtent(ext1.expand(1.25));
     });
 });
