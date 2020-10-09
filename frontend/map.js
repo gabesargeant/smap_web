@@ -4,7 +4,7 @@ var selectedRegions = [];
 
 var map;
 var visDataField;
-var min_max = [0, 5000, 750];
+
 
 var map_colors = [
     [56, 168, 0, 0.5],
@@ -60,11 +60,11 @@ require([
     "esri/symbols/SimpleFillSymbol",
     "esri/layers/FeatureLayer",
     "esri/renderers/ClassBreaksRenderer",
-
+    "esri/Color",
     "esri/graphic",
 
     "esri/symbols/TextSymbol",
-    "esri/Color",
+
     "esri/layers/LabelClass",
 
     "esri/renderers/SimpleRenderer",
@@ -80,17 +80,19 @@ require([
     on,
     Map,
     Extent,
+
     InfoTemplate,
     SimpleLineSymbol,
     SimpleFillSymbol,
     FeatureLayer,
-    ClassBreaksRenderer,
 
+    ClassBreaksRenderer,
+    Color,
     Graphic,
     TextSymbol,
     LabelClass,
     SimpleRenderer,
-    Color,
+
     Draw,
     Query,
     Ready
@@ -98,7 +100,7 @@ require([
     map = new Map("mapDiv", {
         basemap: "osm",
         center: [133.25, -24.15],
-        zoom: 4,
+        zoom: 5,
     });
 
     //Info Template
@@ -147,25 +149,23 @@ require([
 
         code = getLayerAttributesGIS(layerNum);
 
-        console.log("this layer code is:")
-        console.log(code)
-
         var cdx = graphic.attributes[code];
         var val;
-        console.log(latestRequestData.MapData.length)
+        //console.log(latestRequestData.MapData.length)
         for (var i = 0; i < latestRequestData.MapData.length; i++) {
 
             //console.log(latestRequestData.MapData[i].RegionID)
-            console.log("cdx " + cdx);
-            if (cdx.localeCompare(latestRequestData.MapData[i].RegionID) == 0) {
+            //console.log("cdx " + cdx);
+            if (cdx.localeCompare(latestRequestData.MapData[i].RegionID) === 0) {
                 valmap = latestRequestData.MapData[i].KVPairs
-                console.log('vis data : ' + visDataField);
+                //console.log('vis data : ' + visDataField);
 
-                console.log(valmap[visDataField])
+                //console.log(valmap[visDataField])
                 val = valmap[visDataField];
-                console.log(val)
+                //console.log(val)
             }
         }
+
         return val;
     }
 
@@ -265,6 +265,7 @@ require([
     );
     aus.setSelectionSymbol(selectionSymbol);
     ste.setSelectionSymbol(selectionSymbol);
+    console.log("ste rendere is " + ste.renderer)
     sa4.setSelectionSymbol(selectionSymbol);
     sa3.setSelectionSymbol(selectionSymbol);
     sa2.setSelectionSymbol(selectionSymbol);
@@ -299,6 +300,8 @@ require([
     on(dom.byId('selectLayer'), 'change', function (e) {
         //make sure map is in focus
         mapUp()
+
+        currentLayer.renderer = null;
 
         var layer;
         var layerID
@@ -447,19 +450,60 @@ require([
         }
     }
 
-
+    //This is a big method. Like bigly big. 
+    //But it's all updating the breaks and this is the least worst way to do this.
+    //I may in the future refactor out some of the UI parts of this into their own thing, 
+    //But that's not the point of side projects.
     on(updateBreaks, "click", function () {
-        var stp = min_max[2]; //Even breaks to start with.
+        clearSelectedAreas(); //get rid of the selection.
+        currentLayer.renderer = null;
+        visDataField = $("#selectData").val();
+
+        //START Calculate Min Max and Step value of selected data field.
+        var valuesArr = [];
+        for (var i = 0; i < latestRequestData.MapData.length; i++) {
+
+            valueMap = latestRequestData.MapData[i].KVPairs;
+            val = valueMap[visDataField];
+            valuesArr.push(val);
+        }
+
+        var min = Math.min(...valuesArr).toFixed(2);
+        console.log(valuesArr);
+        console.log(min)
+        var max = Math.max(...valuesArr).toFixed(2);
+        console.log(max);
+        var step = (max / 5).toFixed(2);
+        console.log(step);
+
+        var min_max_step = [min, max, step];
+        console.log("mix, mix")
+        console.log(min_max)
+        //END calculate min max
+
+        //START - Setup Breaks //Even breaks to start with.
+        var stp = parseFloat(min_max_step[2]);
         var stp1 = 0;
-        var stp2 = stp;
-        var stp3 = stp * 2;
-        var stp4 = stp * 3;
-        var stp5 = stp * 4;
-        var top = min_max[1]; //max returned val
+        var stp2 = parseFloat(stp);
+        var stp3 = parseFloat(stp * 2);
+        var stp4 = parseFloat(stp * 3);
+        var stp5 = parseFloat(stp * 4);
+        var top = parseFloat(min_max_step[1]); //max returned val
+
+        //Display
+        stp1 = stp1.toFixed(2);
+        stp2 = stp2.toFixed(2);
+        stp3 = stp3.toFixed(2);
+        stp4 = stp4.toFixed(2);
+        stp5 = stp5.toFixed(2);
+        top = top.toFixed(2);
+
 
         if (document.getElementById("ckmeans").checked == true) {
             console.log("using ck means CK Means ");
-            output = ss.ckmeans(ckMeansData, 5);
+            //NOTE to self, the values arr is the array of the values for the 
+            //selected field.
+            output = ss.ckmeans(valuesArr, 5);
             //console.log(output);
             stp1 = 0;
             stp2 = output[1][0];
@@ -469,32 +513,17 @@ require([
             top = output[4][output[4].length - 1];
         }
 
-        $("#one_b").val(parseInt(stp1));
-        $("#two_b").val(parseInt(stp2));
-        $("#three_b").val(parseInt(stp3));
-        $("#four_b").val(parseInt(stp4));
-        $("#five_b").val(parseInt(stp5));
+        $("#one_b").val((stp1));
+        $("#two_b").val((stp2));
+        $("#three_b").val((stp3));
+        $("#four_b").val((stp4));
+        $("#five_b").val((stp5));
 
-        $("#one_a").html(parseInt(stp2 - 1));
-        $("#two_a").html(parseInt(stp3 - 1));
-        $("#three_a").html(parseInt(stp4 - 1));
-        $("#four_a").html(parseInt(stp5 - 1));
-        $("#five_a").val(parseInt(top));
-
-        // var layer;
-        // var layerID
-        // var layerNum
-        // for (var i = 0; i < map.graphicsLayerIds.length; i++) {
-        //     layerID = map.graphicsLayerIds[i];
-        //     layer = map.getLayer(layerID);
-        //     //console.log("this layer is number" + i + "and it is visible?" + layer.visible); 
-        //     if (layer.visible) {
-        //         layerNum = i;
-        //     }
-
-        // }
-
-        // map.removeLayer(layerNum);
+        $("#one_a").html((stp2 - 0.1).toFixed(2));
+        $("#two_a").html((stp3 - 0.1).toFixed(2));
+        $("#three_a").html((stp4 - 0.1).toFixed(2));
+        $("#four_a").html((stp5 - 0.1).toFixed(2));
+        $("#five_a").val(top);
 
         var __map_color = document.getElementById("selectColor");
         var mc_i = __map_color.options[__map_color.selectedIndex].value;
@@ -513,7 +542,7 @@ require([
             mcr3 = mc_i + 1;
             mcr4 = mc_i + 0;
             console.log("jenks");
-            console.log(output);
+
         } else {
             mcr0 = mc_i + 0;
             mcr1 = mc_i + 1;
@@ -538,17 +567,19 @@ require([
         c3 = map_colors[mcr2];
         c4 = map_colors[mcr3];
         c5 = map_colors[mcr4];
+        console.log("map color :" + c5)
 
         var ren = new ClassBreaksRenderer(symbol, findValue);
         ren.addBreak(stp1, stp2, new SimpleFillSymbol().setColor(new Color(c1)));
-        ren.addBreak(stp2 + 1, stp3, new SimpleFillSymbol().setColor(new Color(c2)));
-        ren.addBreak(stp3 + 1, stp4, new SimpleFillSymbol().setColor(new Color(c3)));
-        ren.addBreak(stp4 + 1, stp5, new SimpleFillSymbol().setColor(new Color(c4)));
-        ren.addBreak(stp5 + 1, top, new SimpleFillSymbol().setColor(new Color(c5)));
-
+        ren.addBreak(stp2, stp3, new SimpleFillSymbol().setColor(new Color(c2)));
+        ren.addBreak(stp3, stp4, new SimpleFillSymbol().setColor(new Color(c3)));
+        ren.addBreak(stp4, stp5, new SimpleFillSymbol().setColor(new Color(c4)));
+        ren.addBreak(stp5, top, new SimpleFillSymbol().setColor(new Color(c5)));
+        console.log("renderer");
+        console.log(ren)
         // var fl = get_feature_layer(thematic_region);
 
-        currentLayer.setRenderer(ren);
+
         // if (document.getElementById("check_label").checked == true) {
         //     var label_text = new TextSymbol().setColor(new Color("#000"));
         //     label_text.font.setSize("12pt");
@@ -562,30 +593,43 @@ require([
         //     labelClass.symbol = label_text;
         //     fl.setLabelingInfo([labelClass]);
         // }
-        currentLayer.setVisibility(true);
-        map.addLayer(currentLayer);
+        //currentLayer.setVisibility(true);
+        currentLayer.setRenderer(ren);
+        // map.addLayer(currentLayer);
 
+        var layerNum
+        for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+            var layerID = map.graphicsLayerIds[i];
+            var layer = map.getLayer(layerID);
+            //console.log("this layer is number" + i + "and it is visible?" + layer.visible); 
+            if (layer.visible) {
+                layerNum = i;
+            }
 
-        // code = getLayerAttributesGIS(layerNum)
+        }
 
-        // var ext_arr = [];
-        // for (var i = 0; i < currentLayer.graphics.length; i++) {
-        //     var graphic = currentLayer.graphics[i];
-        //     var cdx = graphic.attributes[code];
+        var code = getLayerAttributesGIS(layerNum)
 
-        //     for (ii = 0; ii < data.length; ii++) {
-        //         if (cdx.localeCompare(data[ii][0]) === 0) {
-        //             ext = new Extent(graphic.geometry.getExtent());
+        var ext_arr = [];
+        for (var i = 0; i < currentLayer.graphics.length; i++) {
+            var graphic = currentLayer.graphics[i];
+            var cdx = graphic.attributes[code];
 
-        //             ext_arr.push(ext);
-        //         }
-        //     }
-        // }
-        // var ext1 = ext_arr[0];
-        // for (j = 1; j < ext_arr.length; j++) {
-        //     ext1 = ext1.union(ext_arr[j]);
-        // }
-        // console.log(ext1)
-        // map.setExtent(ext1.expand(1.25));
+            for (ii = 0; ii < latestRequestData.MapData.length; ii++) {
+                if (cdx.localeCompare(latestRequestData.MapData[ii].RegionID) === 0) {
+                    ext = new Extent(graphic.geometry.getExtent());
+
+                    ext_arr.push(ext);
+                }
+            }
+        }
+        var ext1 = ext_arr[0];
+        for (j = 1; j < ext_arr.length; j++) {
+            ext1 = ext1.union(ext_arr[j]);
+        }
+
+        map.setExtent(ext1.expand(1.5));
+        currentLayer.redraw();
+
     });
 });

@@ -1,4 +1,10 @@
+function vizUp() {
+    document.getElementById('mapLegend').style.zIndex = 1;
+    document.getElementById('mapDiv').style.zIndex = 0;
+    document.getElementById('topicDiv').style.zIndex = -1;
+    document.getElementById('dataDiv').style.zIndex = -2;
 
+}
 
 
 //Display Map
@@ -6,6 +12,7 @@ function mapUp() {
     document.getElementById('mapDiv').style.zIndex = 0;
     document.getElementById('topicDiv').style.zIndex = -1;
     document.getElementById('dataDiv').style.zIndex = -2;
+    document.getElementById('mapLegend').style.zIndex = -2;
 
 }
 //Display data
@@ -14,25 +21,36 @@ function dataUp() {
     document.getElementById('dataOnTopic').innerHTML = document.querySelector('input[name="topic"]:checked').nextElementSibling.innerHTML;
     document.getElementById('mapDiv').style.zIndex = -1;
     document.getElementById('topicDiv').style.zIndex = -2;
-
+    document.getElementById('mapLegend').style.zIndex = -2;
 }
 //Disply Topics
 function topicUp() {
     document.getElementById('topicDiv').style.zIndex = 0;
     document.getElementById('mapDiv').style.zIndex = -1;
     document.getElementById('dataDiv').style.zIndex = -2;
+    document.getElementById('mapLegend').style.zIndex = -2;
 }
 
 //Maybe move this to map.js
-function visualizeCol(id) {
-    visDataField = 'Median_tot_fam_inc_weekly'
+function visualizeCol() {
     latestRequestData = mockdataResponse;
+
+    //todo fill drop down with map of options.
+    $('#selectData').empty();
+    $.each(latestRequestData.Metadata, function (key, value) {
+        $('#selectData').append('<option value="' + key + '">' + value + '</option>');
+        console.log('tick');
+    });
+
+    //visDataField = 'Median_tot_fam_inc_weekly'
+
+    //click the update data button to render the first field.
+    document.getElementById('updateBreaks').click()
+
     console.log(latestRequestData);
-    mapUp();
 
-    console.log("sentID :" + id);
-    console.log(id);
 
+    vizUp();
 }
 
 async function getDataFromAPI(callback, tried) {
@@ -109,6 +127,9 @@ selectAreaEvent.addEventListener('click', mapUp)
 //
 var vizTestBtn = document.getElementById('vizTest');
 vizTestBtn.addEventListener('click', visualizeCol);
+
+var vizDataBtn = document.getElementById('vizData');
+vizDataBtn.addEventListener('click', visualizeCol);
 
 
 //Represents the Map Request to be send the API
