@@ -33,22 +33,15 @@ function topicUp() {
 
 //Maybe move this to map.js
 function visualizeCol() {
-    latestRequestData = mockdataResponse;
 
-    //todo fill drop down with map of options.
     $('#selectData').empty();
     $.each(latestRequestData.Metadata, function (key, value) {
         $('#selectData').append('<option value="' + key + '">' + value + '</option>');
         console.log('tick');
     });
 
-    //visDataField = 'Median_tot_fam_inc_weekly'
-
     //click the update data button to render the first field.
     document.getElementById('updateBreaks').click()
-
-    console.log(latestRequestData);
-
 
     vizUp();
 }
