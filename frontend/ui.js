@@ -94,9 +94,6 @@ function clear() {
     mapUp();
 }
 
-// var queryBtn = document.getElementById('queryBtn');
-// queryBtn.addEventListener('click', getDataFromAPI);
-
 var resetBtn = document.getElementById('resetBtn');
 resetBtn.addEventListener('click', clear);
 
@@ -112,14 +109,6 @@ dataUpBtn.addEventListener('click', dataUp)
 //The select area button will drive a Esri JS event but also ensure that the map is visible
 var selectAreaEvent = document.getElementById('selectAreaBtn');
 selectAreaEvent.addEventListener('click', mapUp)
-
-
-//********************
-// Visualization test button, to be removed.
-//
-//
-var vizTestBtn = document.getElementById('vizTest');
-vizTestBtn.addEventListener('click', visualizeCol);
 
 var vizDataBtn = document.getElementById('vizData');
 vizDataBtn.addEventListener('click', visualizeCol);

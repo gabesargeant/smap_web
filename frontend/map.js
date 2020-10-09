@@ -293,6 +293,8 @@ require([
     currentLayer = ste;
 
     on(dom.byId('selectAreaBtn'), 'click', function () {
+        currentLayer.renderer = null;
+        currentLayer.redraw();
         clearSelectedAreas();
         drawToolbar.activate(Draw.POLYGON);
     });
