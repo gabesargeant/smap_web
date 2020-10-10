@@ -387,7 +387,7 @@ require([
         }
 
         var topic = document.querySelector('input[name="topic"]:checked').value;
-        for (var i = 0; selectedRegionsCodeArray.length && i < 100; i++) {
+        for (var i = 0; i < selectedRegionsCodeArray.length && i < 100; i++) {
             mr = new MapRequest(selectedRegionsCodeArray[i], topic);
             mapRequests.push(mr);
 
