@@ -1,9 +1,12 @@
+var vizLayerUp = false;
+
+
 function vizUp() {
     document.getElementById('mapLegend').style.zIndex = 1;
     document.getElementById('mapDiv').style.zIndex = 0;
     document.getElementById('topicDiv').style.zIndex = -1;
     document.getElementById('dataDiv').style.zIndex = -2;
-
+    vizLayerUp = true;
 }
 
 
@@ -13,6 +16,7 @@ function mapUp() {
     document.getElementById('topicDiv').style.zIndex = -1;
     document.getElementById('dataDiv').style.zIndex = -2;
     document.getElementById('mapLegend').style.zIndex = -2;
+    vizLayerUp = false;
 
 }
 //Display data
@@ -22,6 +26,7 @@ function dataUp() {
     document.getElementById('mapDiv').style.zIndex = -1;
     document.getElementById('topicDiv').style.zIndex = -2;
     document.getElementById('mapLegend').style.zIndex = -2;
+    vizLayerUp = false;
 }
 //Disply Topics
 function topicUp() {
@@ -29,10 +34,13 @@ function topicUp() {
     document.getElementById('mapDiv').style.zIndex = -1;
     document.getElementById('dataDiv').style.zIndex = -2;
     document.getElementById('mapLegend').style.zIndex = -2;
+    vizLayerUp = false;
 }
 
 //Maybe move this to map.js
 function visualizeCol() {
+
+
 
     $('#selectData').empty();
     $.each(latestRequestData.Metadata, function (key, value) {
@@ -57,7 +65,6 @@ async function getDataFromAPI(callback, tried) {
 
         const data = await response.json();
         console.log("data");
-
         console.log(data);
 
         if (!data.hasOwnProperty("message")) {

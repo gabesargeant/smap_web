@@ -265,7 +265,6 @@ require([
     );
     aus.setSelectionSymbol(selectionSymbol);
     ste.setSelectionSymbol(selectionSymbol);
-    console.log("ste rendere is " + ste.renderer)
     sa4.setSelectionSymbol(selectionSymbol);
     sa3.setSelectionSymbol(selectionSymbol);
     sa2.setSelectionSymbol(selectionSymbol);
@@ -293,17 +292,16 @@ require([
     currentLayer = ste;
 
     on(dom.byId('selectAreaBtn'), 'click', function () {
-        currentLayer.renderer = null;
+
         currentLayer.redraw();
         clearSelectedAreas();
         drawToolbar.activate(Draw.POLYGON);
+
     });
 
     on(dom.byId('selectLayer'), 'change', function (e) {
         //make sure map is in focus
         mapUp()
-
-        currentLayer.renderer = null;
 
         var layer;
         var layerID
@@ -338,11 +336,12 @@ require([
         document.getElementById('errorMsg').innerHTML = "";
         document.getElementById("queryBtn").disabled = true;
 
-        selectedRegions.length = 0;
+        //selectedRegions.length = 0;
         mapRequests.length = 0;
 
         var layer = currentLayer;
         selection = layer.getSelectedFeatures();
+        console.log("selection length" + selection.length);
         var code;
         //get the attributes for the first Object in the selected graphics
         //then search it for its CODE element. Take substring search result.
@@ -363,7 +362,7 @@ require([
         //hard 100 geo limit!
         mapRequests = [];
         //get the topic selected in the topic div
-        var topic = document.querySelector('input[name="topic"]:checked').value;
+
 
         if (selection.length == 0) {
             document.getElementById('errorMsg').innerHTML = "No Selection Made. Select over Australia";
@@ -372,16 +371,28 @@ require([
             return;
         }
 
-        for (var i = 0; i < selection.length && i < 100; i++) {
+        selectedRegionsCodeArray = []
+        //sort selections then trim to first 100 ordered.
+        for (var i = 0; i < selection.length; i++) {
+            selectedRegionsCodeArray.push(selection[i].attributes[code])
 
-            value = selection[i].attributes[code];
-            selectedRegions.push(value);
-            mr = new MapRequest(value, topic);
+        }
+        console.log("starting sort");
+        console.log("the array" + selectedRegionsCodeArray);
+        selectedRegionsCodeArray.sort();
+        console.log("the sorted array" + selectedRegionsCodeArray);
+
+        if (selectedRegionsCodeArray.length > 100) {
+            document.getElementById('errorMsg').innerHTML = "You've selected more than 100 areas. This will be trimmed down to 100";
+        }
+
+        var topic = document.querySelector('input[name="topic"]:checked').value;
+        for (var i = 0; selectedRegionsCodeArray.length && i < 100; i++) {
+            mr = new MapRequest(selectedRegionsCodeArray[i], topic);
             mapRequests.push(mr);
 
         }
-
-        console.log(mapRequests)
+        //console.log(mapRequests)
         console.log(JSON.stringify(mapRequests))
 
         document.getElementById("queryBtn").disabled = false;
@@ -579,25 +590,8 @@ require([
         ren.addBreak(stp5, top, new SimpleFillSymbol().setColor(new Color(c5)));
         console.log("renderer");
         console.log(ren)
-        // var fl = get_feature_layer(thematic_region);
 
-
-        // if (document.getElementById("check_label").checked == true) {
-        //     var label_text = new TextSymbol().setColor(new Color("#000"));
-        //     label_text.font.setSize("12pt");
-        //     label_text.font.setFamily("arial");
-        //     var json_label = {
-        //         labelExpressionInfo: {
-        //             expression: "$feature." + thematic_code_name
-        //         }
-        //     };
-        //     var labelClass = new LabelClass(json_label);
-        //     labelClass.symbol = label_text;
-        //     fl.setLabelingInfo([labelClass]);
-        // }
-        //currentLayer.setVisibility(true);
         currentLayer.setRenderer(ren);
-        // map.addLayer(currentLayer);
 
         var layerNum
         for (var i = 0; i < map.graphicsLayerIds.length; i++) {
