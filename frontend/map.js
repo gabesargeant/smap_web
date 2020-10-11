@@ -1,9 +1,9 @@
 //This is the basis for the Map Request Objects
 var mapRequests = [];
 var selectedRegions = [];
-
 var map;
 var visDataField;
+var latestRequestData = {};
 
 
 var map_colors = [
@@ -100,30 +100,9 @@ require([
     map = new Map("mapDiv", {
         basemap: "osm",
         center: [133.25, -24.15],
-        zoom: 5,
+        zoom: 4,
     });
 
-    //Info Template
-    var infoTemplate = new InfoTemplate();
-    infoTemplate.setTitle("Title"); //Standin
-    infoTemplate.setContent(getInfoContent);
-
-    function getInfoContent(graphic) {
-        var fval = findValue(graphic);
-        if (typeof fval === "undefined") {
-            fval = "<br/>No Data available, Sorry!";
-        }
-        rtn_str =
-            "<br> The value of the selected area" +
-            graphic.attributes["POA_NAME_2016"] +
-            "<b>" +
-            name +
-            "</b> is <b>" +
-            fval +
-            "</b>";
-
-        return rtn_str;
-    }
 
     var line = new SimpleLineSymbol();
     line.setWidth(1.5);
@@ -133,6 +112,7 @@ require([
     var symbol = new SimpleFillSymbol();
     symbol = symbol.setOutline(line);
 
+    //This function is for the Renderer to 'find' the value associated with a region code.
     function findValue(graphic) {
 
         var layer;
@@ -151,18 +131,12 @@ require([
 
         var cdx = graphic.attributes[code];
         var val;
-        //console.log(latestRequestData.MapData.length)
+
         for (var i = 0; i < latestRequestData.MapData.length; i++) {
 
-            //console.log(latestRequestData.MapData[i].RegionID)
-            //console.log("cdx " + cdx);
             if (cdx.localeCompare(latestRequestData.MapData[i].RegionID) === 0) {
                 valmap = latestRequestData.MapData[i].KVPairs
-                //console.log('vis data : ' + visDataField);
-
-                //console.log(valmap[visDataField])
                 val = valmap[visDataField];
-                //console.log(val)
             }
         }
 
@@ -177,13 +151,11 @@ require([
 
     function showLoading() {
         esri.show(loading);
-        //map.disableMapNavigation();
         map.hideZoomSlider();
     }
 
     function hideLoading(error) {
         esri.hide(loading);
-        //map.enableMapNavigation();
         map.showZoomSlider();
     }
 
@@ -191,12 +163,15 @@ require([
         mode: FeatureLayer.MODE_ONDEMAND,
         outFields: ["*"],
         visible: false
+
     });
     var ste = new FeatureLayer("https://geo.abs.gov.au/arcgis/rest/services/ASGS2016/SEARCH/MapServer/18", {
         mode: FeatureLayer.MODE_ONDEMAND,
-        outFields: ["*"],
+        outFields: ["*"]
 
     });
+    console.log("infor template for ste level")
+    console.log(ste.infoTemplate);
     var sa4 = new FeatureLayer("https://geo.abs.gov.au/arcgis/rest/services/ASGS2016/SEARCH/MapServer/15", {
         mode: FeatureLayer.MODE_ONDEMAND,
         outFields: ["*"],
@@ -206,41 +181,52 @@ require([
         mode: FeatureLayer.MODE_ONDEMAND,
         outFields: ["*"],
         visible: false
+
     });
     var sa2 = new FeatureLayer("https://geo.abs.gov.au/arcgis/rest/services/ASGS2016/SEARCH/MapServer/13", {
         mode: FeatureLayer.MODE_ONDEMAND,
         outFields: ["*"],
         visible: false
+
     });
+
     var ssc = new FeatureLayer("https://geo.abs.gov.au/arcgis/rest/services/ASGS2016/SEARCH/MapServer/17", {
         mode: FeatureLayer.MODE_ONDEMAND,
         outFields: ["*"],
         visible: false
+
     });
+
+
     var poa = new FeatureLayer("https://geo.abs.gov.au/arcgis/rest/services/ASGS2016/SEARCH/MapServer/11", {
         mode: FeatureLayer.MODE_ONDEMAND,
         outFields: ["*"],
         visible: false
+
     });
     var gccsa = new FeatureLayer("https://geo.abs.gov.au/arcgis/rest/services/ASGS2016/SEARCH/MapServer/4", {
         mode: FeatureLayer.MODE_ONDEMAND,
         outFields: ["*"],
         visible: false
+
     });
     var ced = new FeatureLayer("https://geo.abs.gov.au/arcgis/rest/services/ASGS2016/SEARCH/MapServer/2", {
         mode: FeatureLayer.MODE_ONDEMAND,
         outFields: ["*"],
         visible: false
+
     });
     var sed = new FeatureLayer("https://geo.abs.gov.au/arcgis/rest/services/ASGS2016/SEARCH/MapServer/16", {
         mode: FeatureLayer.MODE_ONDEMAND,
         outFields: ["*"],
         visible: false
+
     });
     var lga = new FeatureLayer("https://geo.abs.gov.au/arcgis/rest/services/ASGS2016/SEARCH/MapServer/8", {
         mode: FeatureLayer.MODE_ONDEMAND,
         outFields: ["*"],
         visible: false
+
     });
 
 
@@ -310,6 +296,7 @@ require([
             layer = map.getLayer(layerID);
             layer.setVisibility(false);
             layer.clearSelection();
+            layer.infoTemplate = undefined;
 
         }
         layerID = map.graphicsLayerIds[e.target.value];
@@ -341,7 +328,7 @@ require([
 
         var layer = currentLayer;
         selection = layer.getSelectedFeatures();
-        console.log("selection length" + selection.length);
+        //console.log("selection length" + selection.length);
         var code;
         //get the attributes for the first Object in the selected graphics
         //then search it for its CODE element. Take substring search result.
@@ -378,9 +365,9 @@ require([
 
         }
         console.log("starting sort");
-        console.log("the array" + selectedRegionsCodeArray);
+        //console.log("the array" + selectedRegionsCodeArray);
         selectedRegionsCodeArray.sort();
-        console.log("the sorted array" + selectedRegionsCodeArray);
+        //console.log("the sorted array" + selectedRegionsCodeArray);
 
         if (selectedRegionsCodeArray.length > 100) {
             document.getElementById('errorMsg').innerHTML = "You've selected more than 100 areas. This will be trimmed down to 100";
@@ -393,7 +380,7 @@ require([
 
         }
         //console.log(mapRequests)
-        console.log(JSON.stringify(mapRequests))
+        //console.log(JSON.stringify(mapRequests))
 
         document.getElementById("queryBtn").disabled = false;
 
@@ -460,6 +447,7 @@ require([
             layerID = map.graphicsLayerIds[i];
             layer = map.getLayer(layerID);
             layer.clearSelection();
+            layer.infoTemplate = undefined;
         }
     }
 
@@ -480,18 +468,11 @@ require([
             val = valueMap[visDataField];
             valuesArr.push(val);
         }
-
         var min = Math.min(...valuesArr).toFixed(2);
-        console.log(valuesArr);
-        console.log(min)
         var max = Math.max(...valuesArr).toFixed(2);
-        console.log(max);
         var step = (max / 5).toFixed(2);
-        console.log(step);
-
         var min_max_step = [min, max, step];
-        console.log("mix, mix")
-        console.log(min_max)
+
         //END calculate min max
 
         //START - Setup Breaks //Even breaks to start with.
@@ -513,7 +494,7 @@ require([
 
 
         if (document.getElementById("ckmeans").checked == true) {
-            console.log("using ck means CK Means ");
+            //console.log("using ck means CK Means ");
             //NOTE to self, the values arr is the array of the values for the 
             //selected field.
             output = ss.ckmeans(valuesArr, 5);
@@ -554,7 +535,7 @@ require([
             mcr2 = mc_i + 2;
             mcr3 = mc_i + 1;
             mcr4 = mc_i + 0;
-            console.log("jenks");
+
 
         } else {
             mcr0 = mc_i + 0;
@@ -580,19 +561,23 @@ require([
         c3 = map_colors[mcr2];
         c4 = map_colors[mcr3];
         c5 = map_colors[mcr4];
-        console.log("map color :" + c5)
 
+        //Create Renderer
         var ren = new ClassBreaksRenderer(symbol, findValue);
         ren.addBreak(stp1, stp2, new SimpleFillSymbol().setColor(new Color(c1)));
         ren.addBreak(stp2, stp3, new SimpleFillSymbol().setColor(new Color(c2)));
         ren.addBreak(stp3, stp4, new SimpleFillSymbol().setColor(new Color(c3)));
         ren.addBreak(stp4, stp5, new SimpleFillSymbol().setColor(new Color(c4)));
         ren.addBreak(stp5, top, new SimpleFillSymbol().setColor(new Color(c5)));
-        console.log("renderer");
-        console.log(ren)
 
         currentLayer.setRenderer(ren);
+        //Info Template
+        var infoTemplate = new InfoTemplate();
+        infoTemplate.setTitle("The Info for this Region"); //Standin
+        infoTemplate.setContent(getInfoContent);
+        currentLayer.setInfoTemplate(infoTemplate);
 
+        //Get this layers number
         var layerNum
         for (var i = 0; i < map.graphicsLayerIds.length; i++) {
             var layerID = map.graphicsLayerIds[i];
@@ -604,6 +589,7 @@ require([
 
         }
 
+        //Get code to use to build extent.
         var code = getLayerAttributesGIS(layerNum)
 
         var ext_arr = [];
@@ -628,4 +614,32 @@ require([
         currentLayer.redraw();
 
     });
+
+
+
+    function getInfoContent(graphic) {
+
+        var fval = findValue(graphic);
+        var layerNum
+        for (var i = 0; i < map.graphicsLayerIds.length; i++) {
+            var layerID = map.graphicsLayerIds[i];
+            var layer = map.getLayer(layerID);
+            if (layer.visible) {
+                layerNum = i;
+            }
+        }
+
+        //Get code to use to build extent.
+        var code = getLayerAttributesGIS(layerNum)
+
+        if (typeof fval === "undefined") {
+            return "<br/>No Data available for this region. Sorry!. Use <b>Select Area</b> then <b>Get Data For Selection</b> to explore.";
+        }
+        rtn_str = "Topic :" + document.querySelector('input[name="topic"]:checked').nextElementSibling.innerHTML + "<hr/>" +
+
+            "<br/> The value of the selected attribute <b>" + $("#selectData option:selected").text() + "</b>" +
+            ", for the area <b>" + getRegionNameFromID(latestRequestData, graphic.attributes[code]) + " " + graphic.attributes[code] +
+            "</b> is <b>" + fval + "</b>";
+        return rtn_str;
+    }
 });

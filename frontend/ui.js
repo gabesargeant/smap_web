@@ -40,12 +40,12 @@ function topicUp() {
 //Maybe move this to map.js
 function visualizeCol() {
 
-
+    latestRequestData = mockdataResponse;
 
     $('#selectData').empty();
     $.each(latestRequestData.Metadata, function (key, value) {
         $('#selectData').append('<option value="' + key + '">' + value + '</option>');
-        console.log('tick');
+
     });
 
     //click the update data button to render the first field.
