@@ -39,8 +39,8 @@ function topicUp() {
 
 //Maybe move this to map.js
 function visualizeCol() {
-
-    latestRequestData = mockdataResponse;
+    //uncomment to use mock data in the request.
+    //latestRequestData = mockdataResponse;
 
     $('#selectData').empty();
     $.each(latestRequestData.Metadata, function (key, value) {
