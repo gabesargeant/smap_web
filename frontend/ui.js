@@ -64,8 +64,8 @@ async function getDataFromAPI(callback, tried) {
         });
 
         const data = await response.json();
-        console.log("data");
-        console.log(data);
+        //console.log("data");
+        //console.log(data);
 
         if (!data.hasOwnProperty("message")) {
             latestRequestData = data

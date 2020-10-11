@@ -170,8 +170,7 @@ require([
         outFields: ["*"]
 
     });
-    console.log("infor template for ste level")
-    console.log(ste.infoTemplate);
+
     var sa4 = new FeatureLayer("https://geo.abs.gov.au/arcgis/rest/services/ASGS2016/SEARCH/MapServer/15", {
         mode: FeatureLayer.MODE_ONDEMAND,
         outFields: ["*"],
@@ -364,13 +363,14 @@ require([
             selectedRegionsCodeArray.push(selection[i].attributes[code])
 
         }
-        console.log("starting sort");
+        //console.log("starting sort");
         //console.log("the array" + selectedRegionsCodeArray);
         selectedRegionsCodeArray.sort();
         //console.log("the sorted array" + selectedRegionsCodeArray);
 
         if (selectedRegionsCodeArray.length > 100) {
-            document.getElementById('errorMsg').innerHTML = "You've selected more than 100 areas. This will be trimmed down to 100";
+            document.getElementById('errorMsg').innerHTML = "You've selected more than 100 areas." +
+                "This will be trimmed down to 100 areas, this may result in a patchy render, if this happens. Try selecting smaller areas.";
         }
 
         var topic = document.querySelector('input[name="topic"]:checked').value;
@@ -630,7 +630,10 @@ require([
         }
 
         //Get code to use to build extent.
-        var code = getLayerAttributesGIS(layerNum)
+        var code = getLayerAttributesGIS(layerNum);
+
+        var regionName = getRegionNameFromID(latestRequestData, graphic.attributes[code]);
+        var regionCode = graphic.attributes[code];
 
         if (typeof fval === "undefined") {
             return "<br/>No Data available for this region. Sorry!. Use <b>Select Area</b> then <b>Get Data For Selection</b> to explore.";
@@ -638,7 +641,7 @@ require([
         rtn_str = "Topic :" + document.querySelector('input[name="topic"]:checked').nextElementSibling.innerHTML + "<hr/>" +
 
             "<br/> The value of the selected attribute <b>" + $("#selectData option:selected").text() + "</b>" +
-            ", for the area <b>" + getRegionNameFromID(latestRequestData, graphic.attributes[code]) + " " + graphic.attributes[code] +
+            ", for the area <b>" + regionName + " " + regionCode +
             "</b> is <b>" + fval + "</b>";
         return rtn_str;
     }
