@@ -103,6 +103,14 @@ require([
         zoom: 4,
     });
 
+    //reset 'default' line symbol.
+    var resetLine = new SimpleLineSymbol();
+    resetLine.setWidth(1.5);
+    resetLine.setStyle(SimpleLineSymbol.SOLID);
+    resetLine.setColor(new Color([225, 0, 0, 1]));
+
+    var resetSymbol = new SimpleFillSymbol();
+    resetSymbol = resetSymbol.setOutline(resetLine);
 
 
     //This function is for the Renderer to 'find' the value associated with a region code.
@@ -280,12 +288,11 @@ require([
     currentLayer = ste;
 
 
-
-
     on(dom.byId('selectAreaBtn'), 'click', function () {
 
-        currentLayer.redraw();
         clearSelectedAreas();
+        currentLayer.setRenderer(new SimpleRenderer(resetSymbol));
+        currentLayer.refresh();
         drawToolbar.activate(Draw.POLYGON);
 
     });
@@ -293,6 +300,7 @@ require([
     on(dom.byId('selectLayer'), 'change', function (e) {
         //make sure map is in focus
         mapUp()
+
 
         var layer;
         var layerID
@@ -315,27 +323,18 @@ require([
 
 
 
+
     on(dom.byId('resetBtn'), 'click', function () {
         drawToolbar.deactivate();
         clearSelectedAreas();
 
-
-        var line = new SimpleLineSymbol();
-        line.setWidth(1.5);
-        line.setStyle(SimpleLineSymbol.SOLID);
-        line.setColor(new Color([225, 0, 0, 1]));
-
-        var symbol = new SimpleFillSymbol();
-        symbol = symbol.setOutline(line);
-
-        currentLayer.setRenderer(new SimpleRenderer(symbol));
+        currentLayer.setRenderer(new SimpleRenderer(resetSymbol));
         currentLayer.refresh();
 
     });
 
 
     on(dom.byId('queryBtn'), 'click', function () {
-
         showLoading();
         document.getElementById('errorMsg').innerHTML = "";
         document.getElementById("queryBtn").disabled = true;
@@ -476,7 +475,7 @@ require([
     //But that's not the point of side projects.
     on(updateBreaks, "click", function () {
         clearSelectedAreas(); //get rid of the selection.
-        currentLayer.renderer = null;
+
         visDataField = $("#selectData").val();
 
         //START Calculate Min Max and Step value of selected data field.
