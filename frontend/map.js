@@ -104,13 +104,6 @@ require([
     });
 
 
-    var line = new SimpleLineSymbol();
-    line.setWidth(1.5);
-    line.setStyle(SimpleLineSymbol.SOLID);
-    line.setColor(new Color([225, 0, 0, 0.4]));
-
-    var symbol = new SimpleFillSymbol();
-    symbol = symbol.setOutline(line);
 
     //This function is for the Renderer to 'find' the value associated with a region code.
     function findValue(graphic) {
@@ -243,6 +236,14 @@ require([
 
     });
 
+    var line = new SimpleLineSymbol();
+    line.setWidth(1.5);
+    line.setStyle(SimpleLineSymbol.SOLID);
+    line.setColor(new Color([225, 0, 0, 0.4]));
+
+    var symbol = new SimpleFillSymbol();
+    symbol = symbol.setOutline(line);
+
 
     var selectionSymbol = new SimpleFillSymbol(
         SimpleFillSymbol.STYLE_SOLID,
@@ -318,6 +319,15 @@ require([
         drawToolbar.deactivate();
         clearSelectedAreas();
 
+
+        var line = new SimpleLineSymbol();
+        line.setWidth(1.5);
+        line.setStyle(SimpleLineSymbol.SOLID);
+        line.setColor(new Color([225, 0, 0, 1]));
+
+        var symbol = new SimpleFillSymbol();
+        symbol = symbol.setOutline(line);
+
         currentLayer.setRenderer(new SimpleRenderer(symbol));
         currentLayer.refresh();
 
@@ -358,12 +368,13 @@ require([
         //get the topic selected in the topic div
 
 
-        if (selection.length == 0) {
-            document.getElementById('errorMsg').innerHTML = "No Selection Made. Select over Australia";
+        if (selection.length < 5) {
+            document.getElementById('errorMsg').innerHTML = "Select at least 5 elements for best effect. Select over Australia";
             hideLoading();
             document.getElementById("queryBtn").disabled = false;
             return;
         }
+
 
         selectedRegionsCodeArray = []
         //sort selections then trim to first 100 ordered.
