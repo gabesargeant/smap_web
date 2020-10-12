@@ -94,8 +94,8 @@ require([
     SimpleRenderer,
 
     Draw,
-    Query,
-    Ready
+    Query
+
 ) {
     map = new Map("mapDiv", {
         basemap: "osm",
@@ -242,6 +242,8 @@ require([
         currentSelection = query;
 
     });
+
+
     var selectionSymbol = new SimpleFillSymbol(
         SimpleFillSymbol.STYLE_SOLID,
         new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
@@ -275,6 +277,9 @@ require([
 
     //aus.hide();current
     currentLayer = ste;
+
+
+
 
     on(dom.byId('selectAreaBtn'), 'click', function () {
 
@@ -312,6 +317,9 @@ require([
     on(dom.byId('resetBtn'), 'click', function () {
         drawToolbar.deactivate();
         clearSelectedAreas();
+
+        currentLayer.setRenderer(new SimpleRenderer(symbol));
+        currentLayer.refresh();
 
     });
 
